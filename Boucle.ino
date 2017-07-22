@@ -75,7 +75,7 @@ void boucle_outdoor () {
   att.nbact = 0;
   order_glasses = 0;
   display.resetSegments();
-  for (_iter = mes_segments._segs.begin(); _iter != mes_segments._segs.end(); _iter++) {
+  for (_iter = mes_segments._segs.begin(); mes_segments.size() != 0 && _iter != mes_segments._segs.end(); _iter++) {
 
     seg = _iter.operator->();
 
