@@ -46,8 +46,8 @@ void setup() {
   Serial.begin(115200);
   Serial1.begin(9600);
   Serial3.begin(115200);
-  Serial3.attachRts(2);
-  Serial3.attachCts(14);
+  //Serial3.attachRts(2);
+  //Serial3.attachCts(14);
   pinMode(led, OUTPUT);
   digitalWriteFast(led, HIGH);
 
