@@ -3,21 +3,21 @@
 // en listant les fichiers sur la SD
 void initListeSegments() {
 
-  char *chaine;
+  static char chaine[20];
   Parcours *par_ = NULL;
 
   Serial.flush();
   Serial.println(F("Fichiers ajoutes:"));
   Serial.flush();
 
-  if (file)
+  if (file.isOpen())
     file.close();
 
-  while ((file = sd.openNextFile())) {
+  while (file.openNext(sd.vwd(), O_READ)) {
 
-    if (!file.isDirectory()) {
+    if (file.isFile()) {
       // Indicate not a directory.
-      chaine = file.name();
+      file.getFilename(chaine);
       Serial.print(chaine);
       if (Segment::nomCorrect(chaine)) {
         Serial.println(F("  ajoute"));
@@ -40,7 +40,7 @@ void initListeSegments() {
     }
 
 
-    if (file)
+    if (file.isOpen())
       file.close();
   }
 
@@ -58,7 +58,7 @@ int chargerCRS(Segment *mon_segment) {
   res = 0;
   time_start = 0.;
 
-  if (file) {
+  if (file.isOpen()) {
     file.close();
   }
   if (mon_segment) {
@@ -67,7 +67,7 @@ int chargerCRS(Segment *mon_segment) {
     Serial.print(F("Nb points: ")); Serial.println(mon_segment->longueur());
 
     Serial.flush();
-    if (!SD.open(mon_segment->getName(), O_READ)) {
+    if (!file.open(mon_segment->getName(), O_READ)) {
       // echec d'ouverture
       Serial.print(F("cFichier introuvable:"));
       Serial.flush();
@@ -76,7 +76,7 @@ int chargerCRS(Segment *mon_segment) {
     }
 
 
-    while (file.read(chaine, TAILLE_LIGNE - 1)) {
+    while (file.fgets(chaine, TAILLE_LIGNE - 1, NULL)) {
 
       // on se met au bon endroit
       if (strstr(chaine, "<")) {
@@ -106,7 +106,7 @@ int chargerPAR(Parcours *mon_parcours) {
 
   res = 0;
 
-  if (file) {
+  if (file.isOpen()) {
     file.close();
   }
   if (mon_parcours) {
@@ -117,7 +117,7 @@ int chargerPAR(Parcours *mon_parcours) {
 #endif
 
     Serial.flush();
-    if (!SD.open(mon_parcours->getName(), O_READ)) {
+    if (!file.open(mon_parcours->getName(), O_READ)) {
       // echec d'ouverture
       Serial.print(F("Fichier introuvable:"));
       Serial.flush();
@@ -126,7 +126,7 @@ int chargerPAR(Parcours *mon_parcours) {
     }
 
 
-    while (file.read(chaine, TAILLE_LIGNE - 1)) {
+    while (file.fgets(chaine, TAILLE_LIGNE - 1, NULL)) {
 
       // on se met au bon endroit
       if (strstr(chaine, "<")) {

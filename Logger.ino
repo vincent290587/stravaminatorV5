@@ -135,8 +135,8 @@ void loggerMsg(const char *msg_) {
 
   Serial.println(msg_);
 
-  if (gpx) gpx.close();
-  if (SD.open("errlog.txt", O_WRITE | O_CREAT | O_APPEND)) {
+  if (gpx.isOpen()) gpx.close();
+  if (gpx.open("errlog.txt", O_WRITE | O_CREAT | O_APPEND)) {
     gpx.println(msg_);
     // fclose
     gpx.close();
@@ -148,8 +148,8 @@ void loggerMsg(int val_) {
 
   Serial.println(val_);
 
-  if (gpx) gpx.close();
-  if (SD.open("errlog.txt", O_WRITE | O_CREAT | O_APPEND)) {
+  if (gpx.isOpen()) gpx.close();
+  if (gpx.open("errlog.txt", O_WRITE | O_CREAT | O_APPEND)) {
     gpx.println(val_);
     // fclose
     gpx.close();
@@ -161,8 +161,8 @@ void loggerMsg(float val_1, float val_2) {
 
   String _line = "";
 
-  if (gpx) gpx.close();
-  if (SD.open("errlog.txt", O_WRITE | O_CREAT | O_APPEND)) {
+  if (gpx.isOpen()) gpx.close();
+  if (gpx.open("errlog.txt", O_WRITE | O_CREAT | O_APPEND)) {
 
     _line += String(val_1, 7) + "@" + String(val_2, 7);
     gpx.println(_line);
@@ -178,8 +178,8 @@ void loggerHT() {
 
   static int header_ecrit = 0;
 
-  if (gpx) gpx.close();
-  if (SD.open("ht.csv", O_WRITE | O_CREAT | O_APPEND)) {
+  if (gpx.isOpen()) gpx.close();
+  if (gpx.open("ht.csv", O_WRITE | O_CREAT | O_APPEND)) {
 
     // en tete
     if (header_ecrit == 0) {
@@ -208,8 +208,8 @@ void loggerRR() {
 
   static int header_ecrit = 0;
 
-  if (gpx) gpx.close();
-  if (SD.open("rr.csv", O_WRITE | O_CREAT | O_APPEND)) {
+  if (gpx.isOpen()) gpx.close();
+  if (gpx.open("rr.csv", O_WRITE | O_CREAT | O_APPEND)) {
 
     // en tete
     if (header_ecrit == 0) {
@@ -249,8 +249,8 @@ void loggerData() {
 
   static int header_ecrit = 0;
 
-  if (gpx) gpx.close();
-  if (SD.open("today.csv", O_WRITE | O_CREAT | O_APPEND)) {
+  if (gpx.isOpen()) gpx.close();
+  if (gpx.open("today.csv", O_WRITE | O_CREAT | O_APPEND)) {
 
     // en tete
     if (header_ecrit == 0) {

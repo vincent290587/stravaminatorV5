@@ -1,6 +1,6 @@
 #include <TinyGPS++.h>
 #include <Adafruit_GFX.h>
-#include <SD.h>
+#include <SdFat.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <AltiBaro.h>
@@ -116,7 +116,7 @@ void setup() {
   digitalWriteFast(memHold, HIGH);
 #endif
 
-  if (!SD.begin(sd_cs)) {
+  if (!sd.begin(sd_cs, SPI_HALF_SPEED)) {
     Serial.println(F("Card initialization failed."));
     display.setSD(-1);
     display.updateScreen();

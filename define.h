@@ -64,9 +64,9 @@ typedef union SWhiteBox {
 } SWhiteBox;
 
 // set up variables using the SD utility library functions:
-File sd;
-File file;
-File gpx;
+SdFat sd;
+SdFile file;
+SdFile gpx;
 
 
 SAttitude att;
