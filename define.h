@@ -16,10 +16,11 @@
 #define SPI_FLASH_64K_SIZE           65536UL //64K block
 #define SPI_FLASH_PAGE_SIZE          256
 
-#define __DEBUG__
+//#define __DEBUG__
 //#define __DEBUG_STC__
 //#define __DEBUG_GPS__
-#define __DEBUG_NRF__
+#define __DEBUG_GPS_S__
+//#define __DEBUG_NRF__
 //#define __SST__
 //#define __DEBUG_SST__
 
@@ -40,7 +41,11 @@ static unsigned long start;
 static unsigned long time_c = 0;
 static unsigned long lastFix = 0;
 
+static uint32_t last_true_gps = 0;
+static uint32_t last_nrf_gps = 0;
+
 static uint8_t new_gps_data = 0;
+static uint8_t new_gpsn_data = 0;
 static uint8_t new_hrm_data = 0;
 static uint8_t new_cad_data = 0;
 static uint8_t new_ancs_data = 0;

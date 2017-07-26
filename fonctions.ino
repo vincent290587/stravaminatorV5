@@ -6,6 +6,9 @@ int percentageBatt (float tensionValue) {
   if (tensionValue > 3.78) {
     fp_ = 536.34*tensionValue*tensionValue*tensionValue-6723.8*tensionValue*tensionValue;
     fp_ += 28186*tensionValue-39402;
+
+    if (fp_ > 100.) fp_ = 100.;
+    
   } else if (tensionValue > 2.) {
     fp_ = pow(10, -11.4)*pow(tensionValue, 22.315);
   } else {
@@ -39,7 +42,7 @@ float get_sec_jour()
   static unsigned long sec_, csec_;
   static unsigned long hour_, min_;
 
-  hour_ = gps.time.hour();
+  hour_ = gps.time.hour(); // GMT
   min_ = gps.time.minute();
   sec_ = gps.time.second();
   csec_ = gps.time.centisecond();

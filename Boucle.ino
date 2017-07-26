@@ -31,7 +31,7 @@ uint8_t cond_wait () {
       }
     case MODE_CRS:
     case MODE_PAR:
-      if (new_gps_data != 0) {
+      if (new_gps_data != 0 || new_gpsn_data != 0) {
         millis_ = millis();
         return 0;
       }

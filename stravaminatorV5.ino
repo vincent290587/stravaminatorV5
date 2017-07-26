@@ -25,6 +25,9 @@ TLCD display(sharp_cs);
 TinyGPSPlus gps;
 TinyGPSCustom hdop(gps, "GPGSA", 16); // $GPGSA sentence, 16th element
 TinyGPSCustom vdop(gps, "GPGSA", 17); // $GPGSA sentence, 17th element
+TinyGPSCustom satsInView(gps, "GPGSV", 3);         // $GPGSV sentence, third element
+TinyGPSCustom satNumber[4];
+TinyGPSCustom snr[4];
 
 Nordic nordic;
 
@@ -81,7 +84,8 @@ void setup() {
   Serial.println("Debut");
 
   // init GPS
-  ////pmkt.sendCommand("$PMTK103*30"); // cold start
+  //pmkt.sendCommand("$PMTK104*37"); // full cold start
+  //pmkt.sendCommand("$PMTK103*30"); // cold start
   delay(1000);
   pmkt.sendCommand("$PMTK314,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0*29");
 
@@ -143,6 +147,13 @@ void setup() {
     Serial.println("Fin setup");
   }
   att.has_started = 1;
+
+  // Initialize all the uninitialized TinyGPSCustom objects
+  for (int i = 0; i < 4; ++i)
+  {
+    satNumber[i].begin(gps, "GPGSV", 4 + 4 * i); // offsets 4, 8, 12, 16
+    snr[i].begin(gps, "GPGSV", 7 + 4 * i); // offsets 7, 11, 15, 19
+  }
 }
 
 
@@ -182,7 +193,7 @@ void serialEvent1() {
   char c;
   while (Serial1.available() && att.has_started > 0) {
     c = Serial1.read();
-#ifdef __DEBUG_GPS__
+#ifdef __DEBUG_GPS_S__
     Serial.write(c);
 #endif
     if (mode_simu == 0) {
@@ -190,7 +201,7 @@ void serialEvent1() {
       if (enc && millis() - lastFix > 500) {
         if (gps.location.isValid()) {
           lastFix = millis();
-          Serial.println("Loc OK");
+          //Serial.println("Loc OK");
         }
         new_gps_data = 1;
       }
@@ -211,6 +222,9 @@ void serialEvent3() {
     }
 #endif
     switch (_format) {
+      case _SENTENCE_LOC:
+        new_gpsn_data = 1;
+        break;
       case _SENTENCE_HRM:
         new_hrm_data = 1;
         break;
@@ -240,7 +254,7 @@ void loop() {
   digitalWriteFast(led, LOW);
   Serial.println("LOOP");
 
-  Serial.println(String("Satellites in view: ") + gps.satellites.value());
+  Serial.println(String("Satellites in view: ") + satsInView.value());
 #endif
 
   // vidage des buffer Serials
@@ -313,7 +327,19 @@ void loop() {
   Serial.println(" mAh");
 #endif
 
-  new_gps_data = 0;
+#ifdef __DEBUG_GPS__
+  static uint32_t last_snr = 0;
+  for (int i = 0; i < 4; ++i)
+  {
+    if (satNumber[i].isValid() && new_gps_data &&
+        millis() - last_snr > 900) {
+      String temp = String("Satellites signal data: sat#") + satNumber[i].value() + " SNR= " + snr[i].value();
+      Serial.println(temp);
+      if (i == 3) last_snr = millis();
+    }
+  }
+#endif
+
   new_hrm_data = 0;
   new_cad_data = 0;
   new_ancs_data = 0;
@@ -323,43 +349,35 @@ void loop() {
   upload_request = 0;
 
   // si pas de fix on affiche la page d'info GPS
-  if (display.getModeCalcul() != MODE_HRM && display.getModeCalcul() != MODE_HT) {
-    if (att.nbpts > MIN_POINTS + 10 && !gps.location.isValid() && display.getModeAffi() != MODE_GPS) {
+  if (att.nbpts > MIN_POINTS + 10 && display.getModeCalcul() != MODE_HRM && display.getModeCalcul() != MODE_HT) {
+    // loc is not good anymore
+    if (isLocOutdated() && display.getModeCalcul() == MODE_CRS) {
       pmkt.sendCommand("$PMTK314,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0*29");
-      display.setStoredMode(display.getModeAffi());
+      display.setStoredMode(display.getModeCalcul());
+      display.setModeCalcul(MODE_GPS);
       display.setModeAffi(MODE_GPS);
-    } else if (att.nbpts > MIN_POINTS + 10 && gps.location.isValid() && display.getModeAffi() == MODE_GPS) {
+    } else if (!isLocOutdated() && display.getModeCalcul() == MODE_GPS) {
+      // loc is good again
       pmkt.sendCommand("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28");
-      display.setModeAffi(display.getStoredMode());
+      display.setModeCalcul(MODE_CRS);
+      display.setModeAffi(MODE_CRS);
     }
   }
 
   // aiguillage pour chaque type d'affichage
   switch (display.getModeCalcul()) {
     case MODE_GPS:
-      display.setNbSatIV(0);
+      display.setNbSatIV(String(satsInView.value()).toInt());
       display.setNbSatU((uint16_t)gps.satellites.value());
       display.setHDOP(String(hdop.value()).toInt());
 
+      // no break;
+
     case MODE_CRS:
-      // recup infos gps
-      att.lat = gps.location.lat();
-      att.lon = gps.location.lng();
-      age     = gps.location.age();
-      
-      if (!gps.location.isValid()) goto piege;
-      att.nbpts++;
 
-      if (gps.altitude.meters() < 5000.) {
-        att.gpsalt = gps.altitude.meters();
-      } else if (att.nbpts <= MIN_POINTS) {
-        att.gpsalt = 0.;
-      } else {
-        att.gpsalt = att.alt;
+      if (updateLocData()) {
+        goto piege;
       }
-
-      att.speed = gps.speed.kmph();
-      att.secj = get_sec_jour();
 
       // maj BMP
       updateAltitude(&att.alt);
@@ -502,4 +520,71 @@ void desactiverNavigateur() {
   return;
 }
 
+uint8_t updateLocData() {
+
+  uint8_t res = 1;
+
+  if (new_gps_data) {
+    if (gps.location.isUpdated()) {
+
+      // recup infos gps
+      att.lat = gps.location.lat();
+      att.lon = gps.location.lng();
+      age     = gps.location.age();
+
+      att.nbpts++;
+
+      if (gps.altitude.meters() < 5000.) {
+        att.gpsalt = gps.altitude.meters();
+      } else if (att.nbpts <= MIN_POINTS) {
+        att.gpsalt = 0.;
+      } else {
+        att.gpsalt = att.alt;
+      }
+
+      att.speed = gps.speed.kmph();
+      att.secj = get_sec_jour() + 3600;
+
+      last_true_gps = millis();
+
+#ifdef __DEBUG_GPS__
+      Serial.println(F("Using true GPS data"));
+#endif
+
+      res = 0;
+    }
+  } else if (new_gpsn_data && (millis() - last_true_gps > 2500)) {
+    att.lat  = nordic.getLat() / 10000000.;
+    att.lon  = nordic.getLon() / 10000000.;
+    age      = 0;
+
+    att.nbpts++;
+
+    att.secj = nordic.getSecJ() + 3600;
+    att.gpsalt = 0;
+
+    last_nrf_gps = millis();
+
+    res = 0;
+
+#ifdef __DEBUG_GPS__
+    Serial.println(F("Using Nordic GPS data"));
+#endif
+
+  }
+
+  // reset flags
+  new_gps_data  = 0;
+  new_gpsn_data = 0;
+
+  return res;
+}
+
+uint8_t isLocOutdated() {
+
+  if (millis() - last_true_gps < 5000) return 0;
+  if (millis() - last_nrf_gps < 5000) return 0;
+  
+  return 1;
+}
 

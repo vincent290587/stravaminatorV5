@@ -6,7 +6,7 @@
 /* ************* */
 /* CONSTRUCTORS  */
 /* ************* */
-TLCD::TLCD(uint8_t ss) : TSharpMem(SPI_CLK, SPI_MOSI, ss) {
+TLCD::TLCD(uint8_t ss) : TSharpMem(SPI_CLK, SPI_MOSI, ss), IntelliScreen() {
 
   _seg_act = 0;
   _nb_lignes_tot = 7;
