@@ -556,12 +556,12 @@ uint8_t updateLocData() {
   } else if (new_gpsn_data && (millis() - last_true_gps > 2500)) {
     att.lat  = nordic.getLat() / 10000000.;
     att.lon  = nordic.getLon() / 10000000.;
+    att.gpsalt = nordic.getEle();
     age      = 0;
 
     att.nbpts++;
 
     att.secj = nordic.getSecJ() + 3600;
-    att.gpsalt = 0;
 
     last_nrf_gps = millis();
 
