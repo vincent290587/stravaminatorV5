@@ -24,6 +24,8 @@ long unsigned int toBase10 (char *entree);
 
 extern void loggerMsg(const char *msg_);
 
+int percentageBatt (float tensionValue);
+
 #ifdef	__cplusplus
 }
 #endif

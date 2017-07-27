@@ -254,10 +254,59 @@ void TLCD::afficheBoot() {
 
 }
 
+void TLCD::printBatt() {
+
+  // SOC
+  setTextSize(1);
+  setCursor(70, 5);
+  print(att.pbatt);
+
+  // charge
+  setTextSize(1);
+  setCursor(70, 15);
+  //TODO print(cbatt, cbatt*cbatt > 100 ? 0 : 1);
+
+  // icone
+  fillRect(120, 10, 3, 6, BLACK); // petit bout
+  drawRect(90, 7, 30, 12, BLACK); // forme exterieure
+  if (att.pbatt > 3) {
+    int Blevel = regFenLim(att.pbatt, 0., 100., 1., 26.);
+    fillRect(92, 9, Blevel, 8, BLACK);
+  }
+
+  // current
+  setTextSize(2);
+  setCursor(5, 5);
+  print(att.cbatt, att.cbatt > 10 ? 0 : 1);
+
+  // Battery voltage
+  setCursor(10, 20);
+  setTextSize(1);
+  print(att.vbatt);
+  //
+  //  // charge
+  //  if (nrf_gpio_pin_read(6)==HIGH) {
+  //    // VUSB present
+  //    setCursor(90, 22);
+  //    setTextSize(1);
+  //    if (nrf_gpio_pin_read(11)==LOW) {
+  //      // charge terminated
+  //      print("CHRG");
+  //    } else {
+  //      print("END");
+  //      neopix.setWeakNotify(WS_RED);
+  //    }
+  //
+  //  }
+
+}
+
 void TLCD::afficheGPS() {
 
   int largeur_b = 0;
   int16_t x, y;
+
+  this->printBatt();
 
   setTextColor(CLR_NRM); // 'inverted' text
   setCursor(60, 133);
@@ -282,18 +331,30 @@ void TLCD::afficheGPS() {
 void TLCD::afficheHRM() {
 
   cadranH(1, "RR", String(att.rrint), "ms");
-  cadran(2, 1, "CAD", String(att.cad_rpm), "rpm");
-  cadran(2, 2, "HRM", String(att.bpm), "bpm");
+
+  cadranH(2, "Dur", String("0") + ":" + 0, 0);
+  
+  cadran(3, 1, "CAD", String(att.cad_rpm), "rpm");
+  cadran(3, 2, "HRM", String(att.bpm), "bpm");
+  
+  cadran(7, 1, "Batt", String(att.pbatt), "%");
+
   traceLignes_NS();
 
 }
 
 void TLCD::afficheHT() {
 
-  cadran(1, 1, "Speed", String(att.cad_speed, 1), "km/h");
-  cadran(1, 2, "Pwr", String(att.pwr), "W");
-  cadran(2, 1, "CAD", String(att.cad_rpm), "rpm");
-  cadran(2, 2, "HRM", String(att.bpm), "bpm");
+  cadranH(1, "Speed", String(att.cad_speed, 1), "km/h");
+  cadranH(2, "Pwr", String(att.pwr), "W");
+  
+  cadran(3, 1, "CAD", String(att.cad_rpm), "rpm");
+  cadran(3, 2, "HRM", String(att.bpm), "bpm");
+
+  cadran(6, 1, "Vmoy", String(0., 2), "km/h");
+  cadran(6, 2, "Dur", String(0) + ":" + 0, 0);
+  cadran(7, 1, "Batt", String(att.pbatt), "%");
+  
   traceLignes_NS();
 
 }
@@ -325,7 +386,7 @@ void TLCD::afficheSegments(void) {
     cadran(3, 1, "CAD", String(att.cad_rpm), "rpm");
     cadran(3, 2, "HRM", String(att.bpm), "bpm");
     cadran(4, 1, "PR", String(att.nbpr), 0);
-    cadran(4, 2, "VA", String(att.vit_asc*3.600, 1), "km/h");
+    cadran(4, 2, "VA", String(att.vit_asc * 3.600, 1), "km/h");
     cadran(6, 1, "Vmoy", String(vmoy, 2), "km/h");
     cadran(6, 2, "Dur", String(hrs) + ":" + mins, 0);
     cadran(7, 1, "Batt", String(att.pbatt), "%");
@@ -353,7 +414,7 @@ void TLCD::afficheSegments(void) {
     cadran(3, 1, "CAD", String(att.cad_rpm), "rpm");
     cadran(3, 2, "HRM", String(att.bpm), "bpm");
     cadran(4, 1, "PR", String(att.nbpr), 0);
-    cadran(4, 2, "VA", String(att.vit_asc*3.600, 1), "km/h");
+    cadran(4, 2, "VA", String(att.vit_asc * 3.600, 1), "km/h");
 
     traceLignes();
 

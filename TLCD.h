@@ -92,6 +92,7 @@ class TLCD : public TSharpMem, public IntelliScreen {
     void updatePos(float lat_, float lon_, float alt_);
     void updateAll(SAttitude *att);
     void updateScreen(void);
+    void printBatt(void);
     void afficheSegments(void);
     void afficheParcours(void);
     void afficheHRM(void);

@@ -119,3 +119,21 @@ long unsigned int toBase10 (char *entree) {
 }
 
 
+int percentageBatt (float tensionValue) {
+
+  float fp_ = 0.;
+
+  if (tensionValue > 3.78) {
+    fp_ = 536.34*tensionValue*tensionValue*tensionValue-6723.8*tensionValue*tensionValue;
+    fp_ += 28186*tensionValue-39402;
+
+    if (fp_ > 100.) fp_ = 100.;
+    
+  } else if (tensionValue > 2.) {
+    fp_ = pow(10, -11.4)*pow(tensionValue, 22.315);
+  } else {
+    fp_ = 0;
+  }
+
+  return (int)fp_;
+}
