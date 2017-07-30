@@ -2,7 +2,6 @@
 #ifndef _TLCD_
 #define _TLCD_
 
-#include <TinyGPS.h>
 #include <IntelliScreen.h>
 #include "TSharpMem.h"
 #include "Segment.h"

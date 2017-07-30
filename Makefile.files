@@ -1,0 +1,46 @@
+
+SRC_DIRECTORY := .
+LIB_DIRECTORY := ../libraries
+
+SRC_FILES +=  \
+  $(wildcard $(SRC_DIRECTORY)/*.c) \
+  $(wildcard $(SRC_DIRECTORY)/*.cpp) \
+  $(LIB_DIRECTORY)/TinyGPSPlus/TinyGPS++.cpp \
+  $(LIB_DIRECTORY)/Adafruit_GFX_Library/Adafruit_GFX.cpp \
+  $(LIB_DIRECTORY)/Adafruit_GFX_Library/glcdfont.c \
+  $(wildcard $(LIB_DIRECTORY)/SdFat/*.cpp) \
+  $(wildcard $(LIB_DIRECTORY)/SdFat/utility/*.cpp) \
+  $(LIB_DIRECTORY)/SPI/SPI.cpp \
+  $(LIB_DIRECTORY)/Wire/Wire.cpp \
+  $(LIB_DIRECTORY)/Wire/utility/twi.c \
+  $(LIB_DIRECTORY)/AltiBaro/Altibaro.cpp \
+  $(LIB_DIRECTORY)/BaroSensor/BaroSensor.cpp \
+  $(LIB_DIRECTORY)/Adafruit_GPS_Library/Adafruit_GPS.cpp \
+  $(LIB_DIRECTORY)/STC3100/STC3100.cpp \
+  $(LIB_DIRECTORY)/Nordic/Nordic.cpp \
+  $(LIB_DIRECTORY)/IntelliScreen/Intelliscreen.cpp \
+  $(wildcard $(LIB_DIRECTORY)/SerialFlash/*.cpp) \
+  $(LIB_DIRECTORY)/TSharpMem/TSharpMem.cpp \
+  
+# Include folders
+INC_FOLDERS += \
+  $(SRC_DIRECTORY) \
+  $(LIB_DIRECTORY)/TinyGPSPlus \
+  $(LIB_DIRECTORY)/Adafruit_GFX_Library  \
+  $(LIB_DIRECTORY)/Adafruit_Unified_Sensor \
+  $(LIB_DIRECTORY)/SdFat \
+  $(LIB_DIRECTORY)/SdFat/utility \
+  $(LIB_DIRECTORY)/SPI  \
+  $(LIB_DIRECTORY)/Wire  \
+  $(LIB_DIRECTORY)/Wire/utility \
+  $(LIB_DIRECTORY)/AltiBaro \
+  $(LIB_DIRECTORY)/BaroSensor  \
+  $(LIB_DIRECTORY)/Adafruit_GPS_Library  \
+  $(LIB_DIRECTORY)/STC3100 \
+  $(LIB_DIRECTORY)/Adafruit_Unified_Sensor  \
+  $(LIB_DIRECTORY)/Nordic \
+  $(LIB_DIRECTORY)/IntelliScreen \
+  $(LIB_DIRECTORY)/SerialFlash  \
+  $(LIB_DIRECTORY)/TSharpMem \
+
+
