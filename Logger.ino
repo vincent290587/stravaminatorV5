@@ -124,7 +124,10 @@ void dumpLogGPS() {
 
     Serial.println(_line);
 
-    if (i==whitebox.sinit.nb_data-1) Serial.println(F("##LOG_START##"));
+    if (i==whitebox.sinit.nb_data-1) {
+      Serial.println(F("##LOG_END##"));
+      return;
+    }
     
 #endif
   }

@@ -364,6 +364,10 @@ void TLCD::afficheSegments(void) {
   unsigned long int hrs = 0, mns = 0;
   String mins = "00";
 
+  if (att.gps_src == 1) {
+    this->fillTriangle(220, 0, 240, 0, 240, 20, BLACK);
+  }
+
   if (att.nbpts - MIN_POINTS > 0 && att.nbsec_act > MIN_POINTS) {
     vmoy = att.dist / att.nbsec_act * 3.6;
     hrs = (float)att.nbsec_act / 3600.;

@@ -172,7 +172,6 @@ void serialEvent() {
           // demande de mise a jour des segments
           //upload_request = 1;
         } else if (nordic.getPC() == 2) {
-          // demande de mise a jour des segments
           mode_simu = 1;
           Serial.println("Mode simu activé");
         }
@@ -306,24 +305,24 @@ void loop() {
 
 
   // Get a new STC measurement
-  stc.getBatteryData(&batt_data);
-  att.cbatt = batt_data.Current;
-  att.pbatt = percentageBatt(batt_data.Voltage);
-  att.vbatt = batt_data.Voltage;
+  stc.refresh();
+  att.cbatt = stc.getCurrent();
+  att.vbatt = stc.getCorrectedVoltage(0.433);
+  att.pbatt = percentageBatt(att.vbatt);
 
 
 #ifdef __DEBUG_STC__
   Serial.print("Temperature STC :    ");
-  Serial.print(batt_data.Temperature, 2);
+  Serial.print(stc.getTemperature(), 2);
   Serial.println(" degres C");
   Serial.print("Current STC     :    ");
-  Serial.print(batt_data.Current, 2);
+  Serial.print(att.cbatt, 2);
   Serial.println(" mA");
   Serial.print("Voltage STC     :    ");
-  Serial.print(batt_data.Voltage, 2);
+  Serial.print(att.vbatt, 2);
   Serial.println(" V");
   Serial.print("Charge STC      :    ");
-  Serial.print(batt_data.Charge, 2);
+  Serial.print(stc.getCharge(), 2);
   Serial.println(" mAh");
 #endif
 
@@ -376,6 +375,7 @@ void loop() {
     case MODE_CRS:
 
       if (updateLocData()) {
+        display.updateAll(&att);
         goto piege;
       }
 
@@ -504,10 +504,10 @@ void buttonEvent (uint8_t evt) {
       buttonPressEvent();
       break;
     case 2:
-      buttonUpEvent ();
+      buttonDownEvent();
       break;
     case 1:
-      buttonDownEvent();
+      buttonUpEvent ();
       break;
   }
 }
@@ -545,6 +545,8 @@ uint8_t updateLocData() {
       att.speed = gps.speed.kmph();
       att.secj = get_sec_jour() + 3600;
 
+      att.gps_src = 0;
+
       last_true_gps = millis();
 
 #ifdef __DEBUG_GPS__
@@ -564,6 +566,8 @@ uint8_t updateLocData() {
     att.secj = nordic.getSecJ() + 3600;
 
     last_nrf_gps = millis();
+
+    att.gps_src = 1;
 
     res = 0;
 

@@ -56,6 +56,7 @@ typedef struct SAttitude { // definition d'un segment
   uint8_t pbatt;
   float rrint;
   float vit_asc;
+  uint8_t gps_src;
 } SAttitude;
 
 typedef union SBlackBox {
