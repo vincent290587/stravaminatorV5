@@ -123,8 +123,8 @@ int Segment::testActivation(ListePoints *liste) {
   }
 
   if (distP2 * distP2 < distP1 * distP1 + distP1P2 * distP1P2 && p_scal > PSCAL_LIM) {
-    return 1;
     Serial.println(F("Test positif"));
+	return 1;
   } else {
     return 0;
     //Serial.println(F("Segment toujours inactif"));
