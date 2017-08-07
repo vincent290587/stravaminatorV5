@@ -147,16 +147,16 @@ void serialEvent() {
           //upload_request = 1;
         } else if (nordic.getPC() == 2) {
           mode_simu = 1;
-          Serial.println("Mode simu activé");
+					Serial.println("Mode simu active");
         }
       }
     } else {
       if (c == '#') {
-        Serial.println("Mode simu desactivé");
+				Serial.println("Mode simu desactive");
         mode_simu = 0;
       }
-      if (gps.encode(c)) {
-        new_gps_data = 1;
+			if (nordic.encode(c)) {
+				new_gpsn_data = 1;
       }
     }
   }
@@ -502,7 +502,7 @@ uint8_t updateLocData() {
 
   uint8_t res = 1;
 
-  if (new_gps_data) {
+	if (new_gps_data && mode_simu == 0) {
     if (gps.location.isUpdated()) {
 
       // recup infos gps

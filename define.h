@@ -17,9 +17,9 @@
 #define SPI_FLASH_PAGE_SIZE          256
 
 //#define __DEBUG__
-#define __DEBUG_STC__
+//#define __DEBUG_STC__
 //#define __DEBUG_GPS__
-#define __DEBUG_GPS_S__
+//#define __DEBUG_GPS_S__
 #define __DEBUG_NRF__
 //#define __SST__
 //#define __DEBUG_SST__
