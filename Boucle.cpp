@@ -114,6 +114,9 @@ void boucle_outdoor () {
           order_glasses = 1;
         }
         display.registerSegment(seg);
+			} else if (tmp_dist < SEG_DISPLAY_DIST) {
+				// just display the segment
+				display.registerSegment(seg);
       }
 
     }

@@ -23,6 +23,7 @@
 #define BLACK 0
 #define WHITE 1
 
+#define NB_SEG_REG 2
 #define ANCS_TIMER 5
 
 typedef struct SAttitude { // definition d'un segment
@@ -153,7 +154,7 @@ class TLCD : public TSharpMem, public IntelliScreen {
     uint8_t _nb_lignes_tot;
     uint8_t _ss, _seg_act, _par_act;
     float _lat, _lon, _alt;
-    Segment *_l_seg[2];
+    Segment *_l_seg[NB_SEG_REG];
     Parcours *_parc;
     ListePoints *_points;
 };

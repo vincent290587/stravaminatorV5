@@ -7,6 +7,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#define SEG_DISPLAY_DIST  150.
+
 uint8_t cond_wait ();
 
 void boucle_outdoor ();

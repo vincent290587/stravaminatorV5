@@ -25,7 +25,7 @@ TLCD::TLCD(uint8_t ss) : TSharpMem(SPI_CLK, SPI_MOSI, ss), IntelliScreen() {
 
 void TLCD::registerSegment(Segment *seg) {
 
-  if (_seg_act < 2 && seg->getStatus() != SEG_OFF) {
+  if (_seg_act < NB_SEG_REG && seg->longueur() > 2) {
     _l_seg[_seg_act] = seg;
     _seg_act += 1;
   }
@@ -422,7 +422,11 @@ void TLCD::afficheSegments(void) {
 
     traceLignes();
 
-    partner(_l_seg[0]->getAvance(), _l_seg[0]->getCur(), NB_LIG);
+    if (_l_seg[0]->getStatus() != SEG_OFF) {
+    	partner(_l_seg[0]->getAvance(), _l_seg[0]->getCur(), NB_LIG);
+    } else {
+    	partner(0, 100., NB_LIG);
+    }
     afficheListePoints(NB_LIG - 2, 0, 0);
 
   } else if (_seg_act == 2) {
@@ -447,16 +451,20 @@ void TLCD::afficheSegments(void) {
 
 void TLCD::afficheParcours(void) {
   float vmoy = 0.;
-  unsigned long int hrs = 0, mns = 0;
+
   String mins = "00";
 
   if (att.nbpts - MIN_POINTS > 0 && att.nbsec_act > MIN_POINTS) {
+	unsigned long int mns = 0;
+
     vmoy = att.dist / att.nbsec_act * 3.6;
-    hrs = (float)att.nbsec_act / 3600.;
+
     mns = att.nbsec_act % 3600;
     mns = mns / 60;
+
     if (mns < 10) mins = "0";
     else mins = "";
+
     mins.append(String(mns));
   }
 
@@ -499,7 +507,9 @@ void TLCD::afficheParcours(void) {
 }
 
 
-
+/**
+ * Indicateur du pourcentage de perf en forme d'avion
+ */
 void TLCD::partner(float rtime, float curtime, uint8_t ligne) {
 
   int hl, ol, dixP;
@@ -547,7 +557,9 @@ void TLCD::partner(float rtime, float curtime, uint8_t ligne) {
 }
 
 
-
+/**
+ *
+ */
 void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
 
   int posTrouve = 0;
@@ -568,8 +580,7 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
   std::list<Point>::iterator _iter;
   ListePoints *liste;
 
-  if (_l_seg[ind_seg]->longueur() < 5) return;
-
+  if (_l_seg[ind_seg]->longueur() < 4) return;
 
   uint16_t debut_cadran = LCDHEIGHT / NB_LIG * (ligne - 1);
   uint16_t fin_cadran   = LCDHEIGHT / NB_LIG * (ligne + 1);
@@ -578,7 +589,13 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
   liste = _l_seg[ind_seg]->getListePoints();
   maPos = liste->getFirstPoint();
   pCourant = maPos;
+  pSuivant = maPos;
+  uint16_t points_nb = 0;
   for (_iter = liste->getLPTS()->begin(); _iter != liste->getLPTS()->end();) {
+
+	  if (_l_seg[ind_seg]->getStatus() == SEG_OFF && ++points_nb > 3) {
+		  break;
+	  }
 
     pCourant = _iter.operator->();
     _iter++;
@@ -595,6 +612,14 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
     if (pCourant->_lon > maxLon) maxLon = pCourant->_lon;
     if (pCourant->_alt > maxAlt) maxAlt = pCourant->_alt;
 
+    if (pSuivant->_lat < minLat) minLat = pSuivant->_lat;
+    if (pSuivant->_lon < minLon) minLon = pSuivant->_lon;
+    if (pSuivant->_alt < minAlt) minAlt = pSuivant->_alt;
+
+    if (pSuivant->_lat > maxLat) maxLat = pSuivant->_lat;
+    if (pSuivant->_lon > maxLon) maxLon = pSuivant->_lon;
+    if (pSuivant->_alt > maxAlt) maxAlt = pSuivant->_alt;
+
     if (maDist > distance_between(pCourant->_lat, pCourant->_lon, _lat, _lon) && _l_seg[ind_seg]->getStatus() > SEG_OFF) {
       maDist = distance_between(pCourant->_lat, pCourant->_lon, _lat, _lon) + 0.1;
       maPos = pCourant;
@@ -605,7 +630,12 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
   }
 
   if (_l_seg[ind_seg]->getStatus() < SEG_OFF) {
-    maPos = pCourant;
+	  // last point
+	  maPos = pCourant;
+  } else if (_l_seg[ind_seg]->getStatus() == SEG_OFF) {
+	  // first point
+	  maPos = liste->getFirstPoint();
+	  maDist = distance_between(maPos->_lat, maPos->_lon, _lat, _lon) + 0.1;
   }
 
   while (maxLon - minLon < (maxLat - minLat)) {
@@ -629,7 +659,12 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
 
   curDist = 0.;
   // on affiche
-  for (_iter = liste->getLPTS()->begin(); _iter != liste->getLPTS()->end();) {
+  points_nb = 0;
+  for (_iter = liste->getLPTS()->begin(); _iter != liste->getLPTS()->end(); ) {
+
+	  if (_l_seg[ind_seg]->getStatus() == SEG_OFF && ++points_nb > 3) {
+		  break;
+	  }
 
     pCourant = _iter.operator->();
     _iter++;
@@ -661,9 +696,18 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
     }
   }
 
-  drawCircle(regFenLim(pCourant->_lon, minLon, maxLon, 0, LCDWIDTH),
-             regFenLim(pCourant->_lat, minLat, maxLat, fin_cadran, debut_cadran), 5, BLACK);
+  // draw a circle at the end of the segment
+  if (_l_seg[ind_seg]->getStatus() != SEG_OFF) {
+	  drawCircle(regFenLim(pSuivant->_lon, minLon, maxLon, 0, LCDWIDTH),
+             regFenLim(pSuivant->_lat, minLat, maxLat, fin_cadran, debut_cadran), 5, BLACK);
+  } else {
+	  // draw a circle at the start of the segment
+	  maPos = liste->getFirstPoint();
+	  drawCircle(regFenLim(maPos->_lon, minLon, maxLon, 0, LCDWIDTH),
+	              regFenLim(maPos->_lat, minLat, maxLat, fin_cadran, debut_cadran), 5, BLACK);
+  }
 
+  // limit position when segment is finished
   if (_l_seg[ind_seg]->getStatus() < SEG_OFF) {
     _lon = pCourant->_lon;
     _lat = pCourant->_lat;
@@ -682,9 +726,12 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
   }
   fillCircle(maDpex, maDpey, 4, BLACK);
 
+  // return before printing text
+  if (_l_seg[ind_seg]->getStatus() == SEG_OFF) {
+      return;
+  }
 
-  setTextColor(CLR_NRM); // 'inverted' text
-
+  setTextColor(CLR_NRM);
   if (maDpey > fin_cadran - 30) {
     setCursor(maDpex > LCDWIDTH - 70 ? LCDWIDTH - 70 : maDpex, maDpey - 20);
   } else {

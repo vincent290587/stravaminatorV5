@@ -529,7 +529,7 @@ uint8_t updateLocData() {
 
       att.speed = gps.speed.kmph();
 
-			att.secj = get_sec_jour();
+	  att.secj = get_sec_jour();
 
       att.gps_src = 0;
 
@@ -545,11 +545,13 @@ uint8_t updateLocData() {
     att.lat  = nordic.getLat() / 10000000.;
     att.lon  = nordic.getLon() / 10000000.;
     att.gpsalt = nordic.getEle();
+    att.speed = (float)nordic.getGpsSpeed() / 100.;
+
     age      = 0;
 
     att.nbpts++;
 
-		att.secj = nordic.getSecJ();
+	att.secj = nordic.getSecJ();
 
     last_nrf_gps = millis();
 
