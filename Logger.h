@@ -11,6 +11,9 @@
 #ifdef __SST__
 void resetWhiteBox();
 
+void checkSST26();
+
+void setToBeErased ();
 
 uint32_t getLastAddress();
 

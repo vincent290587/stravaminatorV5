@@ -70,8 +70,8 @@ int chargerCRS(Segment *mon_segment) {
 
     Serial.print(F("chargerCRS: ")); Serial.println(mon_segment->getName());
     Serial.print(F("Nb points: ")); Serial.println(mon_segment->longueur());
-
     Serial.flush();
+
     if (!file.open(mon_segment->getName(), O_READ)) {
       // echec d'ouverture
       Serial.print(F("cFichier introuvable:"));
@@ -323,6 +323,7 @@ float watchdog(Segment *mon_seg, float lat1, float long1) {
         }
 
         Serial.println(F("Le watchdog charge le fichier"));
+        Serial.flush();
         chargerCRS(mon_seg);
 
       }

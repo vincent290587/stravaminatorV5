@@ -354,19 +354,25 @@ void loop() {
         goto piege;
       }
 
-      // maj BMP
+		// maj baro
+		if (mode_simu || att.nbpts <= MIN_POINTS) {
+			att.alt = att.gpsalt;
+		} else {
       updateAltitude(&att.alt);
+		}
 
       mes_points.enregistrePos(att.lat, att.lon, att.alt, att.secj);
 
       // maj merites
       if (att.nbpts < MIN_POINTS) {
+
         // maj sharp
         display.updateAll(&att);
 
         if (att.nbpts < 4) {
           basicTone();
         }
+
         goto piege;
       } else if (att.nbpts == MIN_POINTS) {
         // maj GPS
@@ -413,6 +419,7 @@ void loop() {
       break;
     case MODE_SIMU:
       boucle_simu();
+		// no break
     case MODE_HRM:
     case MODE_HT:
       display.updateAll(&att);
@@ -521,7 +528,8 @@ uint8_t updateLocData() {
       }
 
       att.speed = gps.speed.kmph();
-      att.secj = get_sec_jour() + 3600;
+
+			att.secj = get_sec_jour();
 
       att.gps_src = 0;
 
@@ -541,7 +549,7 @@ uint8_t updateLocData() {
 
     att.nbpts++;
 
-    att.secj = nordic.getSecJ() + 3600;
+		att.secj = nordic.getSecJ();
 
     last_nrf_gps = millis();
 

@@ -28,7 +28,6 @@ void resetWhiteBox() {
 
 uint32_t getLastAddress() {
 
-  uint8_t i;
   SWhiteBox whitebox;
   memset(&whitebox, 0, sizeof(SInitTable));
 
@@ -49,7 +48,6 @@ uint32_t getLastAddress() {
 
 void checkSST26() {
 
-  uint8_t i;
   SWhiteBox whitebox;
   memset(&whitebox, 0, sizeof(SInitTable));
 
@@ -79,6 +77,8 @@ void setToBeErased () {
 
     SerialFlash.eraseBlock(TABLE);
     SerialFlash.write(TABLE, whitebox.tab, sizeof(SInitTable));
+
+    Serial.println("SST26 setToBeErased");
   }
 
 }
@@ -161,16 +161,19 @@ void dumpLogGPS() {
     _line += String(bbox.satt.temp, 1) + ",";
     _line += String(bbox.satt.gpsalt, 2) + ",";
     _line += String(bbox.satt.vbatt, 3) + ",";
-    _line += String(bbox.satt.cbatt, 3);
+    _line += String(bbox.satt.cbatt, 3) + ",";
+    _line += String(bbox.satt.secj_prec) + ",";
+    _line += String(bbox.satt.speed, 2) + ",";
+    _line += String(bbox.satt.cad_speed, 2) + ",";
+    _line += String(bbox.satt.vit_asc, 2) + ",";
+    _line += String(bbox.satt.power, 1) + ",";
+    _line += String(bbox.satt.gps_src, 3);
 
     Serial.println(_line);
-
-    if (i==whitebox.sinit.nb_data-1) {
-      Serial.println(F("##LOG_END##"));
-      return;
-    }
-
+    Serial.flush();
   }
+  Serial.println(F("##LOG_END##"));
+  Serial.flush();
 }
 #endif
 
