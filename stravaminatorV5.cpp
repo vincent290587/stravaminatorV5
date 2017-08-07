@@ -146,8 +146,14 @@ void serialEvent() {
           // demande de mise a jour des segments
           //upload_request = 1;
         } else if (nordic.getPC() == 2) {
-          mode_simu = 1;
-					Serial.println("Mode simu active");
+          mode_simu = mode_simu > 0 ? 0 : 1;
+		  Serial.println("Mode simu toggled");
+        } else if (nordic.getPC() == 3) {
+          // fin histo
+          download_request = 0;
+          // effacement de l'histo
+          effacerHisto();
+          Serial.println("Fin du mode historique");
         }
       }
     } else {

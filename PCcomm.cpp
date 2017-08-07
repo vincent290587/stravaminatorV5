@@ -32,12 +32,21 @@ int PChisto() {
 
   } // fin du fichier
 
-  delay(1000);
-  Serial.println(F("##LOG_STOP##"));
-
   if (file.isOpen()) {
     file.close();
   }
+
+  delay(100);
+
+  uint8_t ind_lim = 0;
+  while (download_request && ++ind_lim < 5) {
+	  Serial.println(F("##LOG_STOP##"));
+	  Serial.flush();
+	  delay(1000);
+  }
+
+  Serial1.begin(9600);
+  Serial3.begin(115200);
 
   return 0;
 }

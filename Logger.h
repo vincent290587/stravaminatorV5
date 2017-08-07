@@ -28,7 +28,6 @@ void loggerMsg(int val_);
 
 void loggerMsg(float val_1, float val_2);
 
-
 void loggerHT();
 
 void loggerRR();
@@ -37,7 +36,6 @@ void loggerData();
 
 void ecrireHeader ();
 
-
-void positionEcrit ();
+void effacerHisto();
 
 #endif

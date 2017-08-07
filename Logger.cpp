@@ -275,6 +275,36 @@ void loggerRR() {
 
 }
 
+
+
+void positionEcrit () {
+
+  String _line = "";
+
+  _line += String(att.lat, 7) + ",";
+  _line += String(att.lon, 7) + ",";
+  _line += String(att.alt, 2) + ",";
+  _line += String(att.secj) + ",";
+  _line += String(att.bpm) + ",";
+  _line += String(att.cad_rpm) + ",";
+  _line += String(att.temp, 1) + ",";
+  _line += String(att.gpsalt, 2) + ",";
+  _line += String(att.vbatt, 3) + ",";
+  _line += String(att.cbatt, 3) + ",";
+  _line += String(att.secj_prec) + ",";
+  _line += String(att.speed, 2) + ",";
+  _line += String(att.cad_speed, 2) + ",";
+  _line += String(att.vit_asc, 2) + ",";
+  _line += String(att.power, 1) + ",";
+  _line += String(att.gps_src, 3) + ",";
+  _line += String(time_c);
+
+  gpx.println(_line);
+
+}
+
+
+
 void loggerData() {
 
 #ifdef __SST__
@@ -321,24 +351,17 @@ void ecrireHeader () {
 
 }
 
+void effacerHisto() {
 
-void positionEcrit () {
+	Serial.println("Effacement historique");
 
-  String _line = "";
+	  if (gpx.isOpen()) gpx.close();
+	  if (gpx.open("today.csv", O_WRITE | O_CREAT)) {
 
-  _line += String(att.lat, 7) + ",";
-  _line += String(att.lon, 7) + ",";
-  _line += String(att.alt, 2) + ",";
-  _line += String(att.secj) + ",";
-  _line += String(att.bpm) + ",";
-  _line += String(att.cad_rpm) + ",";
-  _line += String(att.temp, 1) + ",";
-  _line += String(att.gpsalt, 2) + ",";
-  _line += String(att.vbatt, 3) + ",";
-  _line += String(att.cbatt, 3) + ",";
-  _line += String(time_c);
+		  String _line = "";
+		  gpx.println(_line);
 
-  gpx.println(_line);
+	  }
+	  if (gpx.isOpen()) gpx.close();
 
 }
-
