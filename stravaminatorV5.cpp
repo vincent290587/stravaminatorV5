@@ -166,10 +166,7 @@ void serialEvent() {
 		Serial.println("Mode simu desactive");
         mode_simu = 0;
       }
-//      if (nordic.getPC() == 2) {
-//    	  mode_simu = 0;
-//    	  Serial.println("Mode simu desactive");
-//      }
+
 	  if (nordic.encode(c)) {
 		new_gpsn_data = 1;
       }

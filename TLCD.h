@@ -9,6 +9,8 @@
 #include "utils.h"
 #include "WProgram.h"
 
+#define SEG_OFF_NB_POINTS   5
+
 #define SPI_CLK   13
 #define SPI_MOSI  11
 

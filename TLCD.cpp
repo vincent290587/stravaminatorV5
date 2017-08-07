@@ -593,7 +593,7 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
   uint16_t points_nb = 0;
   for (_iter = liste->getLPTS()->begin(); _iter != liste->getLPTS()->end();) {
 
-	  if (_l_seg[ind_seg]->getStatus() == SEG_OFF && ++points_nb > 3) {
+	  if (_l_seg[ind_seg]->getStatus() == SEG_OFF && points_nb++ > SEG_OFF_NB_POINTS) {
 		  break;
 	  }
 
@@ -636,17 +636,29 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
 	  // first point
 	  maPos = liste->getFirstPoint();
 	  maDist = distance_between(maPos->_lat, maPos->_lon, _lat, _lon) + 0.1;
+
+	  // notre position doit etre dans le rectangle
+	  if (_lat < minLat) minLat = _lat;
+	  if (_lon < minLon) minLon = _lon;
+	  if (_alt < minAlt) minAlt = _alt;
+
+	  if (_lat > maxLat) maxLat = _lat;
+	  if (_lon > maxLon) maxLon = _lon;
+	  if (_alt > maxAlt) maxAlt = _alt;
   }
 
+  // on essaye de rendre l'image carree: ratio 1:1
+  //if (_l_seg[ind_seg]->getStatus() != SEG_OFF) {
   while (maxLon - minLon < (maxLat - minLat)) {
-    minLon -= 0.0008;
-    maxLon += 0.0008;
+	  minLon -= 0.0008;
+	  maxLon += 0.0008;
   }
 
   while (maxLat - minLat < 0.5 * (maxLon - minLon)) {
-    minLat -= 0.0014;
-    maxLat += 0.0014;
+	  minLat -= 0.0014;
+	  maxLat += 0.0014;
   }
+  //}
 
   // marge TODO
   minLat -= 0.0014;
@@ -662,7 +674,7 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
   points_nb = 0;
   for (_iter = liste->getLPTS()->begin(); _iter != liste->getLPTS()->end(); ) {
 
-	  if (_l_seg[ind_seg]->getStatus() == SEG_OFF && ++points_nb > 3) {
+	  if (_l_seg[ind_seg]->getStatus() == SEG_OFF && points_nb++ > SEG_OFF_NB_POINTS) {
 		  break;
 	  }
 
