@@ -2,6 +2,7 @@ PROJECT_NAME     := stravaminator
 TARGETS          := stravaminatorV5
 OUTPUT_DIRECTORY := _build
 
+CMSIS_PATH := ../CMSIS/Lib/GCC
 SDK_ROOT := ../cores/teensy3
 PROJ_DIR := .
 
@@ -45,7 +46,7 @@ ASMFLAGS += -x assembler-with-cpp
 
 
 # Linker flags
-LDFLAGS += -mthumb -mabi=aapcs -L $(TEMPLATE_PATH) -T$(LINKER_SCRIPT)
+LDFLAGS += -mthumb -mabi=aapcs -L $(TEMPLATE_PATH) -L $(CMSIS_PATH) -T$(LINKER_SCRIPT)
 LDFLAGS += -mcpu=cortex-m4
 LDFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # let linker to dump unused sections
