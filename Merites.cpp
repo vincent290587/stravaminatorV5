@@ -6,8 +6,15 @@
    Created on September 11, 2014, 11:01 AM
 */
 
+
 #include "Merites.h"
 #include <WProgram.h>
+
+
+
+Filter hspeed(vspeed_coefficients);
+Filter vspeed(vspeed_coefficients);
+Filter fele(vspeed_coefficients);
 
 Merite::Merite() {
   distance = 0.;
@@ -17,6 +24,11 @@ Merite::Merite() {
   last_stored_lon = -200.;
   pr_won = 0;
   puissance = 0.;
+  vit_asc = 0;
+
+  vspeed.reset();
+  hspeed.reset();
+  fele.reset();
 }
 
 // GETTERS
@@ -34,8 +46,6 @@ float Merite::getPower() {
 }
 
 
-// SETTERS
-
 
 // Mise a jour avec la pos GPS courante
 int Merite::majMerite(float lat, float lon, float ele) {
@@ -44,6 +54,9 @@ int Merite::majMerite(float lat, float lon, float ele) {
   static int res;
 
   res = 0;
+
+  // filter elevation
+  fele.input(ele);
 
   if (last_stored_lat < -90.) {
     // initialisation
@@ -67,15 +80,15 @@ int Merite::majMerite(float lat, float lon, float ele) {
 
   // hysteresis
   if (res == 1) {
-    if (ele > last_stored_ele + 1.) {
+    if (fele.output() > last_stored_ele + 1.) {
       // mise a jour de la montee totale
-      climb += ele - last_stored_ele;
-      last_stored_ele = ele;
+      climb += fele.output() - last_stored_ele;
+      last_stored_ele = fele.output();
     }
-    else if (ele + 1. < last_stored_ele) {
+    else if (fele.output() + 1. < last_stored_ele) {
       // on descend, donc on garde la derniere alti
       // la plus basse
-      last_stored_ele = ele;
+      last_stored_ele = fele.output();
     }
   }
 
@@ -106,22 +119,20 @@ void Merite::majPower(ListePoints *mes_points, float speed_) {
       Pc = mes_points->getPointAt(i);
       _x[i] = Pc._rtime - P2._rtime;
       _y[i] = Pc._alt;
-      //Serial.println("Alt " + String(_x[i], 2) + " / " + String(_y[i], 1));
+      Serial.println("Alt " + String(_x[i], 2) + " / " + String(_y[i], 1));
     }
+
     _lrCoef[1] = _lrCoef[0] = 0;
-    simpLinReg(_x, _y, _lrCoef, FILTRE_NB + 1);
+    this->simpLinReg(_x, _y, _lrCoef, FILTRE_NB + 1);
 
     // STEP 1 : on filtre altitude et vitesse
-    vit_asc = 0.8 * vit_asc + 0.2 * _lrCoef[0];
-    //Serial.println("Vit= " + String(vit_asc, 2));
+    vspeed.input(_lrCoef[0]);
+    vit_asc = vspeed.output();
+    //Serial.println("testVit= " + String(vit_asc, 2));
 
-    if (fSpeed < -0.5) {
-      // on init
-      fSpeed = speed_ / 3.6;
-    }
-    else {
-      fSpeed = 0.6 * fSpeed +  0.4 * speed_ / 3.6;
-    }
+    // filter horizontal speed (m/s)
+    hspeed.input(speed_ / 3.6);
+    fSpeed = hspeed.output();
 
     // STEP 2 : Calcul
     puissance = 9.81 * MASSE * vit_asc; // grav
@@ -129,9 +140,11 @@ void Merite::majPower(ListePoints *mes_points, float speed_) {
     puissance += 0.204 * fSpeed * fSpeed * fSpeed; // air
     puissance *= 1.025; // transmission (rendement velo)
 
-    if (fSpeed < 1.5 || fSpeed > 45. || puissance < 5.) {
+    if (fSpeed < 1.5) {
       puissance = -100.;
     }
+  } else {
+	  Serial.println("dTime= " + String(dTime, 2));
   }
 
   return;

@@ -34,6 +34,7 @@ uint8_t cond_wait () {
         millis_ = millis();
         return 0;
       }
+		// no break
     case MODE_CRS:
     case MODE_PAR:
       if (new_gps_data != 0 || new_gpsn_data != 0) {
@@ -68,11 +69,14 @@ void boucle_outdoor () {
 
   resetdelay_();
 
-  if (att.cad_speed > CAD_SPD_PW_LIM && att.cad_rpm > 0) {
+	if (att.cad_speed > CAD_SPD_PW_LIM && att.cad_rpm > 0 && !mode_simu) {
+		// speed from CAD
     cumuls.majPower(&mes_points, att.cad_speed);
   } else {
+		// speed from GPS
     cumuls.majPower(&mes_points, att.speed);
   }
+	att.power = cumuls.getPower();
 
   std::list<Segment>::iterator _iter;
   Segment *seg;
@@ -80,6 +84,7 @@ void boucle_outdoor () {
   att.nbact = 0;
   order_glasses = 0;
   display.resetSegments();
+
   for (_iter = mes_segments._segs.begin(); mes_segments.size() != 0 && _iter != mes_segments._segs.end(); _iter++) {
 
     seg = _iter.operator->();
@@ -87,6 +92,7 @@ void boucle_outdoor () {
     if (seg->isValid() && time_c < 930) {
 
       tmp_dist = watchdog (seg, att.lat, att.lon);
+
       if (tmp_dist < min_dist_seg && seg->getStatus() == SEG_OFF) min_dist_seg = tmp_dist;
 
       seg->majPerformance(&mes_points);
@@ -117,6 +123,7 @@ void boucle_outdoor () {
 
   } // fin for
 
+	// information to glasses
   if (order_glasses == 0) {
     Serial3.println(Nordic::encodeOrder(5., 5.));
     order_glasses = 1;
