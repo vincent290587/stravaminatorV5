@@ -353,15 +353,26 @@ void ecrireHeader () {
 
 void effacerHisto() {
 
-	Serial.println("Effacement historique");
+	if (gpx.isOpen()) gpx.close();
 
-	  if (gpx.isOpen()) gpx.close();
-	  if (gpx.open("today.csv", O_WRITE | O_CREAT)) {
+	if (sd.exists("today.csv")) {
+		if (sd.remove("today.csv")) {
+			Serial.println("Effacement historique");
+		} else {
+			Serial.println("Echec effacement historique");
+		}
 
-		  String _line = "";
-		  gpx.println(_line);
+		// create empty file
+		if (gpx.open("today.csv", O_WRITE | O_CREAT)) {
 
-	  }
-	  if (gpx.isOpen()) gpx.close();
+			String _line = "";
+			gpx.println(_line);
+
+		}
+	} else {
+		Serial.println("Historique deja efface");
+	}
+
+	if (gpx.isOpen()) gpx.close();
 
 }

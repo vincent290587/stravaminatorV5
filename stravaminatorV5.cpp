@@ -146,23 +146,32 @@ void serialEvent() {
           // demande de mise a jour des segments
           //upload_request = 1;
         } else if (nordic.getPC() == 2) {
-          mode_simu = mode_simu > 0 ? 0 : 1;
-		  Serial.println("Mode simu toggled");
+          mode_simu = 1;
+		  Serial.println("Mode simu active");
+		  Serial.clear();
         } else if (nordic.getPC() == 3) {
           // fin histo
           download_request = 0;
           // effacement de l'histo
+#ifndef __SST__
           effacerHisto();
+#else
+          setToBeErased ();
+#endif
           Serial.println("Fin du mode historique");
         }
       }
     } else {
       if (c == '#') {
-				Serial.println("Mode simu desactive");
+		Serial.println("Mode simu desactive");
         mode_simu = 0;
       }
-			if (nordic.encode(c)) {
-				new_gpsn_data = 1;
+//      if (nordic.getPC() == 2) {
+//    	  mode_simu = 0;
+//    	  Serial.println("Mode simu desactive");
+//      }
+	  if (nordic.encode(c)) {
+		new_gpsn_data = 1;
       }
     }
   }
@@ -272,7 +281,6 @@ void loop() {
     }
 #else
     dumpLogGPS();
-    setToBeErased ();
 #endif
   }
 

@@ -93,7 +93,11 @@ int chargerCRS(Segment *mon_segment) {
       }
 
     } // fin du fichier
-    file.close();
+
+    if (file.isOpen()) {
+      file.close();
+    }
+
     Serial.println(F("Chargement effectue !"));
     Serial.print(F("Nb points: ")); Serial.println(mon_segment->longueur());
   } else {
@@ -119,9 +123,9 @@ int chargerPAR(Parcours *mon_parcours) {
 #ifdef __DEBUG__
     Serial.print(F("chargerPAR: ")); Serial.println(mon_parcours->getName());
     Serial.print(F("Nb points: ")); Serial.println(mon_parcours->longueur());
+    Serial.flush();
 #endif
 
-    Serial.flush();
     if (!file.open(mon_parcours->getName(), O_READ)) {
       // echec d'ouverture
       Serial.print(F("Fichier introuvable:"));
@@ -143,7 +147,11 @@ int chargerPAR(Parcours *mon_parcours) {
       }
 
     } // fin du fichier
-    file.close();
+
+    if (file.isOpen()) {
+      file.close();
+    }
+
 #ifdef __DEBUG__
     Serial.println(F("Chargement effectue !"));
     Serial.print(F("Nb points: ")); Serial.println(mon_parcours->longueur());
