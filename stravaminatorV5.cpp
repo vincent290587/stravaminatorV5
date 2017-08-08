@@ -152,14 +152,17 @@ void serialEvent() {
         } else if (nordic.getPC() == 3) {
           // fin histo
           download_request = 0;
-          // effacement de l'histo
-#ifndef __SST__
-          effacerHisto();
-#else
-          setToBeErased ();
-#endif
           Serial.println("Fin du mode historique");
-        }
+        } else if (nordic.getPC() == 4) {
+            // fin histo
+            download_request = 0;
+            // effacement de l'histo
+  #ifndef __SST__
+            effacerHisto();
+  #else
+            setToBeErased ();
+  #endif
+          }
       }
     } else {
       if (c == '#') {
