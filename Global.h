@@ -3,11 +3,11 @@
 #ifndef VUE_GLOBAL_H_
 #define VUE_GLOBAL_H_
 
-#include <TinyGPS++.h>
+
 #include <Adafruit_GFX.h>
 #include <SdFat.h>
 #include <AltiBaro.h>
-#include <Adafruit_GPS.h>
+#include "myGPS.h"
 #include <STC3100.h>
 #include <Nordic.h>
 #include <IntelliScreen.h>
@@ -18,6 +18,7 @@
 #include "ListePoints.h"
 #include "Segment.h"
 #include "Parcours.h"
+#include "Filter.h"
 
 #include "define.h"
 
@@ -32,7 +33,7 @@ extern SdFile gpx;
 
 extern TLCD display;
 
-extern TinyGPSPlus gps;
+extern myGPS gps;
 extern TinyGPSCustom hdop; // $GPGSA sentence, 16th element
 extern TinyGPSCustom vdop; // $GPGSA sentence, 17th element
 extern TinyGPSCustom satsInView;         // $GPGSV sentence, third element
@@ -51,8 +52,6 @@ extern AltiBaro baro;
 
 extern STC3100 stc;
 
-extern Adafruit_GPS pmkt;
-
 extern SAttitude att;
 
 extern ListeSegments mes_segments;
@@ -61,6 +60,9 @@ extern ListePoints   mes_points;
 
 extern ListeParcours mes_parcours;
 
+extern Filter hspeed;
+extern Filter stc_cur;
+extern Filter fpressu;
 
 extern const uint8_t virtbtn0; // PTD0
 extern const uint8_t virtbtn1; // PTD1

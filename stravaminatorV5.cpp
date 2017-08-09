@@ -3,6 +3,7 @@
 
 #include <avr/sleep.h>
 #include "Boucle.h"
+#include "BoucleCRS.h"
 #include "Global.h"
 #include "Logger.h"
 #include "PCcomm.h"
@@ -18,7 +19,6 @@ void setup() {
   att.has_started = 0;
   // initialize the digital pin as an output.
   Serial.begin(115200);
-  Serial1.begin(9600);
   Serial3.begin(115200);
   //Serial3.attachRts(2);
   //Serial3.attachCts(14);
@@ -54,11 +54,15 @@ void setup() {
 
   Serial.println("Debut");
 
+  // reset filters
+  fpressu.reset();
+  stc_cur.reset();
+
   // init GPS
-  //pmkt.sendCommand("$PMTK104*37"); // full cold start
-  //pmkt.sendCommand("$PMTK103*30"); // cold start
+  //gps.sendCommand("$PMTK104*37"); // full cold start
+  //gps.sendCommand("$PMTK103*30"); // cold start
   delay(1000);
-  pmkt.sendCommand("$PMTK314,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0*29");
+  gps.sendCommand("$PMTK314,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0*29");
 
 
   /* Initialise the sensor */
@@ -120,6 +124,12 @@ void setup() {
     delay(400);
     Serial.println("Fin setup");
   }
+
+  // start listening to GPS
+  Serial1.begin(9600);
+
+  service_peripherals(1);
+
   att.has_started = 1;
 
   // Initialize all the uninitialized TinyGPSCustom objects
@@ -236,7 +246,9 @@ void serialEvent3() {
   }
 }
 
-// the loop routine runs over and over again forever:
+/**
+ *
+ */
 void loop() {
 #ifdef __DEBUG__
   digitalWriteFast(led, LOW);
@@ -258,20 +270,28 @@ void loop() {
     att.bpm = nordic.getBPM();
     att.rrint = nordic.getRR();
   }
-  if (new_cad_data && nordic.getRPM()) att.cad_rpm = nordic.getRPM();
-  if (new_cad_data && nordic.getSpeed() > 0.) att.cad_speed = nordic.getSpeed();
+  if (new_cad_data && nordic.getRPM()) {
+	  att.cad_rpm = nordic.getRPM();
+  }
+  if (new_cad_data && nordic.getSpeed() > 0.) {
+	  att.cad_speed = nordic.getSpeed();
+  }
   if (new_ancs_data) {
     if (alertes_nb < 20) {
       alertes_nb += 1;
     }
     String tmp = String ("") + nordic.getANCS_title() + nordic.getANCS_msg();
-    if (tmp.indexOf("ppel") > 0 || tmp.indexOf("essage") > 0) basicTone();
+    if (tmp.indexOf("ppel") > 0 || tmp.indexOf("essage") > 0) {
+    	basicTone();
+    }
     display.notifyANCS(nordic.getANCS_type(), nordic.getANCS_title(), nordic.getANCS_msg());
   }
   if (new_dbg_data) {
     String tmp = String("Erreur nRF51: code=") + String(nordic.getDBG_code(), HEX) + " - line:" + String(nordic.getDBG_line());
     loggerMsg(tmp.c_str());
-    if (nordic.getDBG_type() == 1) loggerMsg(nordic.getDBG_msg());
+    if (nordic.getDBG_type() == 1) {
+    	loggerMsg(nordic.getDBG_msg());
+    }
   }
   if (download_request) {
     Serial.println("Debut MaJ");
@@ -284,20 +304,13 @@ void loop() {
 #endif
   }
 
-
-  // backlight
-  if (display.getBackLight() != 0) {
-    digitalWriteFast(led, LOW);
-  } else {
-    digitalWriteFast(led, HIGH);
-  }
-
-
-  // Get a new STC measurement
-  stc.refresh();
-  att.cbatt = stc.getCurrent();
+  // get power data
+  att.cbatt = stc_cur.output();
   att.vbatt = stc.getCorrectedVoltage(0.433);
   att.pbatt = percentageBatt(att.vbatt);
+
+  // get altitude data
+  att.alt = baro.pressureToAltitude(fpressu.output());
 
 
 #ifdef __DEBUG_STC__
@@ -314,6 +327,7 @@ void loop() {
   Serial.print(stc.getCharge(), 2);
   Serial.println(" mAh");
 #endif
+
 
 #ifdef __DEBUG_GPS__
   static uint32_t last_snr = 0;
@@ -340,13 +354,13 @@ void loop() {
   if (att.nbpts > MIN_POINTS + 10 && display.getModeCalcul() != MODE_HRM && display.getModeCalcul() != MODE_HT) {
     // loc is not good anymore
     if (isLocOutdated() && display.getModeCalcul() == MODE_CRS) {
-      pmkt.sendCommand("$PMTK314,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0*29");
+      gps.sendCommand("$PMTK314,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0*29");
       display.setStoredMode(display.getModeCalcul());
       display.setModeCalcul(MODE_GPS);
       display.setModeAffi(MODE_GPS);
     } else if (!isLocOutdated() && display.getModeCalcul() == MODE_GPS) {
       // loc is good again
-      pmkt.sendCommand("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28");
+      gps.sendCommand("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28");
       display.setModeCalcul(MODE_CRS);
       display.setModeAffi(MODE_CRS);
     }
@@ -364,6 +378,7 @@ void loop() {
     case MODE_CRS:
 
       if (updateLocData()) {
+    	// no useable LOC
         display.updateAll(&att);
         goto piege;
       }
@@ -372,7 +387,7 @@ void loop() {
 		if (mode_simu || att.nbpts <= MIN_POINTS) {
 			att.alt = att.gpsalt;
 		} else {
-      updateAltitude(&att.alt);
+			att.alt = baro.pressureToAltitude(fpressu.output());
 		}
 
       mes_points.enregistrePos(att.lat, att.lon, att.alt, att.secj);
@@ -382,17 +397,13 @@ void loop() {
 
         // maj sharp
         display.updateAll(&att);
-
-        if (att.nbpts < 4) {
-          basicTone();
-        }
-
         goto piege;
+
       } else if (att.nbpts == MIN_POINTS) {
         // maj GPS
-        pmkt.sendCommand("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28");
+        gps.sendCommand("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28");
         // maj BMP
-        updateAltitudeOffset(&att.alt);
+        updateAltitudeOffset();
         // mode switch
         display.setModeCalcul(MODE_CRS);
         display.setModeAffi(MODE_CRS);
@@ -406,11 +417,15 @@ void loop() {
       boucle_outdoor();
 
       if (cumuls.majMerite(att.lat, att.lon, att.alt) == 1) {
+
         loggerData();
         att.nbsec_act += att.secj - att.secj_prec;
         att.secj_prec = att.secj;
-      } else if (att.speed < 3.) {
+
+      } else if (att.speed < 3. && att.cad_speed < 3.) {
+
         att.secj_prec = att.secj;
+
       }
 
       att.vit_asc = cumuls.getVitAsc();
@@ -438,6 +453,9 @@ void loop() {
     case MODE_HT:
       display.updateAll(&att);
       break;
+    default:
+    	display.updateAll(&att);
+    	break;
 
   }
 
@@ -449,6 +467,11 @@ piege:
 #endif
 
   while (cond_wait() == 1) {
+
+	  // gather measurements
+	  service_peripherals();
+
+	  // sleep
     idle();
   }
 
@@ -511,109 +534,54 @@ void buttonEvent (uint8_t evt) {
   }
 }
 
-void activerNavigateur() {
-  return;
-}
 
-void desactiverNavigateur() {
-  return;
-}
+uint8_t cond_wait () {
 
-uint8_t updateLocData() {
+  static long millis_ = millis();
 
-  uint8_t res = 1;
-
-	if (new_gps_data && mode_simu == 0) {
-    if (gps.location.isUpdated()) {
-
-      // recup infos gps
-      att.lat = gps.location.lat();
-      att.lon = gps.location.lng();
-      age     = gps.location.age();
-
-      att.nbpts++;
-
-      if (gps.altitude.meters() < 5000.) {
-        att.gpsalt = gps.altitude.meters();
-      } else if (att.nbpts <= MIN_POINTS) {
-        att.gpsalt = 0.;
-      } else {
-        att.gpsalt = att.alt;
-      }
-
-      att.speed = gps.speed.kmph();
-
-	  att.secj = get_sec_jour();
-
-      att.gps_src = 0;
-
-      last_true_gps = millis();
-
-#ifdef __DEBUG_GPS__
-      Serial.println(F("Using true GPS data"));
-#endif
-
-      res = 0;
-    }
-  } else if (new_gpsn_data && (millis() - last_true_gps > 2500)) {
-    att.lat  = nordic.getLat() / 10000000.;
-    att.lon  = nordic.getLon() / 10000000.;
-    att.gpsalt = nordic.getEle();
-    att.speed = (float)nordic.getGpsSpeed() / 100.;
-
-    age      = 0;
-
-    att.nbpts++;
-
-	att.secj = nordic.getSecJ();
-
-    last_nrf_gps = millis();
-
-    att.gps_src = 1;
-
-    res = 0;
-
-#ifdef __DEBUG_GPS__
-    Serial.println(F("Using Nordic GPS data"));
-#endif
-
+  if (download_request || upload_request) {
+    return 0;
   }
 
-  // reset flags
-  new_gps_data  = 0;
-  new_gpsn_data = 0;
+  if (millis() - millis_ > 1500) {
+    millis_ = millis();
+    return 0;
+  }
 
-  return res;
-}
+  if (new_btn_data != 0) {
+    millis_ = millis();
+    return 0;
+  }
 
-uint8_t isLocOutdated() {
+  switch (display.getModeCalcul()) {
+    case MODE_GPS:
+      if (new_ancs_data != 0) {
+        millis_ = millis();
+        return 0;
+      }
+		// no break
+    case MODE_CRS:
+    case MODE_PAR:
+      if (new_gps_data != 0 || new_gpsn_data != 0) {
+        millis_ = millis();
+        return 0;
+      }
+      break;
+    case MODE_HRM:
+      if (new_hrm_data != 0) {
+        millis_ = millis();
+        return 0;
+      }
+      break;
+    case MODE_HT:
+      if (new_cad_data != 0) {
+        millis_ = millis();
+        return 0;
+      }
+      break;
+  }
 
-  if (millis() - last_true_gps < 5000) return 0;
-  if (millis() - last_nrf_gps < 5000) return 0;
-  
+
   return 1;
 }
-
-
-void updateAltitude(float *_alt) {
-
-    baro.getTempAndPressure(&att.temp, &att.pressu);
-    /* Then convert the atmospheric pressure, and SLP to altitude*/
-    *_alt = baro.pressureToAltitude(att.pressu);
-
-}
-
-void updateAltitudeOffset (float *_alt) {
-  
-  // pressure est mis a jour ici
-  updateAltitude(_alt);
-  // mise a jour de la pression au niveau de la mer
-  baro.seaLevelForAltitude(att.gpsalt, att.pressu);
-  // recalcul de falt avec la premiere mise a jour
-  updateAltitude(_alt);
-  // on set la correction
-  baro.setCorrection(att.alt - att.gpsalt);
-  
-}
-
 

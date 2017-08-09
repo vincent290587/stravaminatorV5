@@ -10,6 +10,8 @@ void loop();
 
 void idle();
 
+uint8_t cond_wait ();
+
 void usage_fault_isr(void);
 
 void software_isr(void);
@@ -23,18 +25,5 @@ void buttonUpEvent ();
 void buttonPressEvent ();
 
 void buttonEvent (uint8_t evt);
-
-void activerNavigateur();
-
-void desactiverNavigateur();
-
-uint8_t updateLocData();
-
-uint8_t isLocOutdated();
-
-
-void updateAltitude(float *_alt);
-
-void updateAltitudeOffset (float *_alt);
 
 #endif

@@ -6,15 +6,12 @@
    Created on September 11, 2014, 11:01 AM
 */
 
-
+#include "Global.h"
 #include "Merites.h"
 #include <WProgram.h>
 
 
 
-Filter hspeed(vspeed_coefficients);
-Filter vspeed(vspeed_coefficients);
-Filter fele(vspeed_coefficients);
 
 Merite::Merite() {
   distance = 0.;
@@ -25,10 +22,6 @@ Merite::Merite() {
   pr_won = 0;
   puissance = 0.;
   vit_asc = 0;
-
-  vspeed.reset();
-  hspeed.reset();
-  fele.reset();
 }
 
 // GETTERS
@@ -55,9 +48,6 @@ int Merite::majMerite(float lat, float lon, float ele) {
 
   res = 0;
 
-  // filter elevation
-  fele.input(ele);
-
   if (last_stored_lat < -90.) {
     // initialisation
     last_stored_lat = lat;
@@ -80,22 +70,34 @@ int Merite::majMerite(float lat, float lon, float ele) {
 
   // hysteresis
   if (res == 1) {
-    if (fele.output() > last_stored_ele + 1.) {
+    if (ele > last_stored_ele + 1.) {
       // mise a jour de la montee totale
-      climb += fele.output() - last_stored_ele;
-      last_stored_ele = fele.output();
+      climb += ele - last_stored_ele;
+      last_stored_ele = ele;
     }
-    else if (fele.output() + 1. < last_stored_ele) {
+    else if (ele + 1. < last_stored_ele) {
       // on descend, donc on garde la derniere alti
       // la plus basse
-      last_stored_ele = fele.output();
+      last_stored_ele = ele;
     }
   }
 
   return res;
 }
 
+/**
+ *
+ */
+void Merite::resetClimb(float new_ele) {
 
+	last_stored_ele = new_ele;
+	climb = 0.;
+
+}
+
+/**
+ *
+ */
 void Merite::majPower(ListePoints *mes_points, float speed_) {
 
   static float fSpeed = -1.;
@@ -112,7 +114,7 @@ void Merite::majPower(ListePoints *mes_points, float speed_) {
 
   dTime = P1._rtime - P2._rtime;
 
-  if (fabs(dTime) > 1.5 && fabs(dTime) < FILTRE_NB + 5) {
+  if (fabs(dTime) > 1.5 && fabs(dTime) < 25) {
 
     // calcul de la vitesse ascentionnelle par regression lineaire
     for (i = 0; i <= FILTRE_NB; i++) {
@@ -126,13 +128,11 @@ void Merite::majPower(ListePoints *mes_points, float speed_) {
     this->simpLinReg(_x, _y, _lrCoef, FILTRE_NB + 1);
 
     // STEP 1 : on filtre altitude et vitesse
-    vspeed.input(_lrCoef[0]);
-    vit_asc = vspeed.output();
+    vit_asc = _lrCoef[0];
     //Serial.println("testVit= " + String(vit_asc, 2));
 
-    // filter horizontal speed (m/s)
-    hspeed.input(speed_ / 3.6);
-    fSpeed = hspeed.output();
+    // horizontal speed (m/s)
+    fSpeed = speed_ / 3.6;
 
     // STEP 2 : Calcul
     puissance = 9.81 * MASSE * vit_asc; // grav

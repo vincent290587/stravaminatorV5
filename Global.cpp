@@ -8,6 +8,17 @@
 #include "Global.h"
 
 
+//////// filter coefficients
+const float vspeed_coefficients[10] =
+{
+		// Scaled for floating point
+
+		0.053805042058918236, 0.10761008411783647, 0.053805042058918236, 1.1295059120217161, -0.33775737827236,// b0, b1, b2, a1, a2
+		0.0625, 0.125, 0.0625, 1.4013136354923321, -0.6596793652882533// b0, b1, b2, a1, a2
+
+};
+
+
 namespace mvc {
 	
 // set up variables using the SD utility library functions:
@@ -17,7 +28,7 @@ SdFile gpx;
 
 TLCD display(sharp_cs);
 
-TinyGPSPlus gps;
+myGPS         gps(&Serial1);
 TinyGPSCustom hdop(gps, "GPGSA", 16); // $GPGSA sentence, 16th element
 TinyGPSCustom vdop(gps, "GPGSA", 17); // $GPGSA sentence, 17th element
 TinyGPSCustom satsInView(gps, "GPGSV", 3);         // $GPGSV sentence, third element
@@ -36,8 +47,6 @@ AltiBaro baro = AltiBaro();
 
 STC3100 stc = STC3100(0x70);
 
-Adafruit_GPS pmkt(&Serial1);
-
 SAttitude att;
 
 ListeSegments mes_segments;
@@ -46,6 +55,10 @@ ListePoints   mes_points;
 
 ListeParcours mes_parcours;
 
+// filters
+Filter hspeed(vspeed_coefficients);
+Filter stc_cur(vspeed_coefficients);
+Filter fpressu(vspeed_coefficients);
 
 const uint8_t virtbtn0 = 2; // PTD0
 const uint8_t virtbtn1 = 14; // PTD1

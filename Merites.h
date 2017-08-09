@@ -17,15 +17,6 @@
 
 #define MASSE       79.
 
-//////// filter coefficients
-const float vspeed_coefficients[10] =
-{
-		// Scaled for floating point
-
-		0.053805042058918236, 0.10761008411783647, 0.053805042058918236, 1.1295059120217161, -0.33775737827236,// b0, b1, b2, a1, a2
-		0.0625, 0.125, 0.0625, 1.4013136354923321, -0.6596793652882533// b0, b1, b2, a1, a2
-
-};
 
 class Merite {
 
@@ -37,6 +28,8 @@ class Merite {
     float getPower();
     float getVitAsc() {return vit_asc;}
     void majPower(ListePoints *mes_points, float speed_);
+
+    void resetClimb(float new_ele);
 
   private:
     float distance;

@@ -175,6 +175,8 @@ void dumpLogGPS() {
     	delay(1);// 4
     } while (64 != Serial.availableForWrite());
 
+    yield();
+
   }
 
   delay(100);
@@ -249,8 +251,7 @@ void loggerHT() {
 
     gpx.print(att.cad_rpm); gpx.print(",");
 
-    //TODO
-    //gpx.print(calcul_puissance());gpx.print(",");
+    //TODO implement ANT-FEC
 
     // fclose
     gpx.close();
@@ -348,10 +349,8 @@ void loggerData() {
     // corps
     positionEcrit();
 
-    // fclose
-    gpx.close();
-
   }
+  if (gpx.isOpen()) gpx.close();
 #endif
 }
 

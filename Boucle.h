@@ -7,12 +7,13 @@
 #include <string.h>
 #include <stdio.h>
 
-#define SEG_DISPLAY_DIST  150.
 
-uint8_t cond_wait ();
+#define PERIPHERALS_SERVICE_TIMEOUT    100
 
-void boucle_outdoor ();
+
 
 void boucle_simu ();
+
+void service_peripherals (uint8_t force = 0);
 
 #endif
