@@ -170,10 +170,21 @@ void dumpLogGPS() {
     _line += String(bbox.satt.gps_src, 3);
 
     Serial.println(_line);
-    Serial.flush();
+    //Serial.flush();
+    do {
+    	delay(1);// 4
+    } while (64 != Serial.availableForWrite());
+
   }
-  Serial.println(F("##LOG_END##"));
-  Serial.flush();
+
+  delay(100);
+
+  uint8_t ind_lim = 0;
+  while (download_request && ++ind_lim < 5) {
+	  Serial.println(F("##LOG_STOP##"));
+	  Serial.flush();
+	  delay(1000);
+  }
 }
 #endif
 
@@ -320,8 +331,8 @@ void loggerData() {
   incrementeAddress();
   Serial.println("Logging on the SST done");
 
-  return;
-#endif
+
+#else
 
   static int header_ecrit = 0;
 
@@ -341,7 +352,7 @@ void loggerData() {
     gpx.close();
 
   }
-
+#endif
 }
 
 void ecrireHeader () {

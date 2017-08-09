@@ -30,6 +30,8 @@ int PChisto() {
     } while (64 != Serial.availableForWrite());
     //delay(25);
 
+    yield();
+
   } // fin du fichier
 
   if (file.isOpen()) {
