@@ -128,10 +128,10 @@ uint8_t updateLocData() {
 			last_true_gps = millis();
 
 #ifdef __DEBUG_GPS__
-Serial.println(F("Using true GPS data"));
+			Serial.println(F("Using true GPS data"));
 #endif
 
-res = 0;
+			res = 0;
 		}
 	} else if (new_gpsn_data && (millis() - last_true_gps > 2500)) {
 		att.lat  = nordic.getLat() / 10000000.;

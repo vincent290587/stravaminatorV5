@@ -6,51 +6,51 @@ using namespace mvc;
 // charge physique le .crs depuis la SD
 int PChisto() {
 
-  char chaine[TAILLE_LIGNE];
+	char chaine[TAILLE_LIGNE];
 
-  if (file.isOpen()) {
-    file.close();
-  }
+	if (file.isOpen()) {
+		file.close();
+	}
 
-  if (!file.open("TODAY.CSV", O_READ)) {
-    // echec d'ouverture
-    return 1;
-  }
+	if (!file.open("TODAY.CSV", O_READ)) {
+		// echec d'ouverture
+		return 1;
+	}
 
-  Serial.println(F("##LOG_START##"));
+	Serial.println(F("##LOG_START##"));
 
-  Serial1.end();
-  Serial3.end();
+	Serial1.end();
+	Serial3.end();
 
-  while (file.fgets(chaine, TAILLE_LIGNE - 1, NULL)) {
+	while (file.fgets(chaine, TAILLE_LIGNE - 1, NULL)) {
 
-    Serial.print(chaine);
-    do {
-      delay(1);// 4
-    } while (64 != Serial.availableForWrite());
-    //delay(25);
+		Serial.print(chaine);
+		do {
+			delay(1);// 4
+		} while (64 != Serial.availableForWrite());
+		//delay(25);
 
-    yield();
+		yield();
 
-  } // fin du fichier
+	} // fin du fichier
 
-  if (file.isOpen()) {
-    file.close();
-  }
+	if (file.isOpen()) {
+		file.close();
+	}
 
-  delay(100);
+	delay(100);
 
-  uint8_t ind_lim = 0;
-  while (download_request && ++ind_lim < 5) {
-	  Serial.println(F("##LOG_STOP##"));
-	  Serial.flush();
-	  delay(1000);
-  }
+	uint8_t ind_lim = 0;
+	while (download_request && ++ind_lim < 5) {
+		Serial.println(F("##LOG_STOP##"));
+		Serial.flush();
+		delay(1000);
+	}
 
-  Serial1.begin(9600);
-  Serial3.begin(115200);
+	Serial1.begin(9600);
+	Serial3.begin(115200);
 
-  return 0;
+	return 0;
 }
 
 

@@ -20,7 +20,7 @@ const float vspeed_coefficients[10] =
 
 
 namespace mvc {
-	
+
 // set up variables using the SD utility library functions:
 SdFat sd;
 SdFile file;
