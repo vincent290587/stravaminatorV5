@@ -134,10 +134,10 @@ uint8_t updateLocData() {
 			res = 0;
 		}
 	} else if (new_gpsn_data && (millis() - last_true_gps > 2500)) {
-		att.lat  = nordic.getLat() / 10000000.;
-		att.lon  = nordic.getLon() / 10000000.;
-		att.gpsalt = nordic.getEle();
-		att.speed = (float)nordic.getGpsSpeed() / 100.;
+		att.lat  = (float)nordic.getLat() / 10000000.;
+		att.lon  = (float)nordic.getLon() / 10000000.;
+		att.gpsalt = (float)nordic.getEle() / 100.;
+		att.speed = (float)nordic.getGpsSpeed() * 3.6 / 100.;
 
 		age      = 0;
 
