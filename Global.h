@@ -23,6 +23,8 @@
 #include "define.h"
 
 #define BATT_INT_RES                   0.433
+#define CAD_SPEED_TIMEOUT_MS           3000
+
 
 namespace mvc {
 
@@ -83,6 +85,7 @@ extern unsigned long lastFix;
 
 extern uint32_t last_true_gps;
 extern uint32_t last_nrf_gps;
+extern uint32_t last_nrf_cad;
 
 extern uint8_t new_gps_data;
 extern uint8_t new_gpsn_data;

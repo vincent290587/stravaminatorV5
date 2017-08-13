@@ -23,7 +23,7 @@ void boucle_outdoor () {
 
 	resetdelay_();
 
-	if (att.cad_speed > CAD_SPD_PW_LIM && att.cad_rpm > 0 && !mode_simu) {
+	if (millis() - last_nrf_cad < CAD_SPEED_TIMEOUT_MS && !mode_simu) {
 		// speed from CAD
 		cumuls.majPower(&mes_points, att.cad_speed);
 	} else {

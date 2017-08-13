@@ -15,6 +15,8 @@
 
 #define FILTRE_NB   6
 
+#define FILTRE_CAD_ACC   1.6
+
 #define MASSE       79.
 
 
@@ -28,6 +30,7 @@ class Merite {
     float getPower();
     float getVitAsc() {return vit_asc;}
     void majPower(ListePoints *mes_points, float speed_);
+    int  majCRS(float cad_speed, int8_t hrm, uint16_t power);
 
     void resetClimb(float new_ele);
 
@@ -43,6 +46,9 @@ class Merite {
     float _x[FILTRE_NB+1];
     float _lrCoef[2];
     float vit_asc;
+
+    float m_cad_speed_prev;
+    float m_ht_last_update_time;
 
     void simpLinReg(float* x, float* y, float* lrCoef, int n);
 };

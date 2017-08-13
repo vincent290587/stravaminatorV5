@@ -23,7 +23,11 @@ void setup() {
 	//Serial3.attachRts(2);
 	//Serial3.attachCts(14);
 	pinMode(led, OUTPUT);
+#ifdef __DEBUG__
 	digitalWriteFast(led, HIGH);
+#endif
+
+	last_nrf_cad = millis();
 
 	// pseudo boutons
 	pinMode(virtbtn0, OUTPUT);
@@ -33,7 +37,6 @@ void setup() {
 
 	memset(&att, 0, sizeof(SAttitude));
 
-	delay(50);
 	display.begin();
 	delay(5);
 	display.resetBuffer();
@@ -61,7 +64,7 @@ void setup() {
 	// init GPS
 	//gps.sendCommand("$PMTK104*37"); // full cold start
 	//gps.sendCommand("$PMTK103*30"); // cold start
-	delay(1000);
+	delay(50);
 	gps.sendCommand("$PMTK314,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0*29");
 
 
@@ -138,6 +141,10 @@ void setup() {
 		satNumber[i].begin(gps, "GPGSV", 4 + 4 * i); // offsets 4, 8, 12, 16
 		snr[i].begin(gps, "GPGSV", 7 + 4 * i); // offsets 7, 11, 15, 19
 	}
+
+#ifdef __DEBUG__
+	digitalWriteFast(led, LOW);
+#endif
 }
 
 
@@ -273,8 +280,12 @@ void loop() {
 	if (new_cad_data && nordic.getRPM()) {
 		att.cad_rpm = nordic.getRPM();
 	}
-	if (new_cad_data && nordic.getSpeed() > 0.) {
-		att.cad_speed = nordic.getSpeed();
+	if (new_cad_data && nordic.getCadSpeed() > 0.) {
+		att.cad_speed = (float)nordic.getCadSpeed() / 1000.;
+		last_nrf_cad = millis();
+	} else if (millis() - last_nrf_cad > CAD_SPEED_TIMEOUT_MS) {
+		// if no event were recived from the CAD, set the speed to 0
+		att.cad_speed = 0.;
 	}
 	if (new_ancs_data) {
 		if (alertes_nb < 20) {
@@ -446,15 +457,50 @@ void loop() {
 	case MODE_PAR:
 		display.updateAll(&att);
 		break;
+
+	case MODE_HT:
+
+		att.secj = millis() / 1000;
+
+		if (cumuls.majCRS(att.cad_speed, att.bpm, 0)) {
+
+			loggerHT();
+
+			att.nbsec_act += att.secj - att.secj_prec;
+			att.secj_prec = att.secj;
+
+			att.dist = cumuls.getDistance();
+
+		}
+
+		if (att.cad_speed < 3.) {
+
+			att.secj_prec = att.secj;
+
+		}
+		display.updateAll();
+		break;
+
 	case MODE_SIMU:
 		boucle_simu();
 		// no break
 	case MODE_HRM:
-	case MODE_HT:
-		display.updateAll(&att);
+
+		att.secj = millis() / 1000;
+
+		if (cumuls.majCRS(att.cad_speed, att.bpm, 0)) {
+
+			loggerRR();
+
+			att.nbsec_act += att.secj - att.secj_prec;
+			att.secj_prec = att.secj;
+
+		}
+
+		display.updateAll();
 		break;
 	default:
-		display.updateAll(&att);
+		display.updateAll();
 		break;
 
 	}

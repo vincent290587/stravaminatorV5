@@ -339,11 +339,23 @@ void TLCD::afficheHRM() {
 
 	cadran(7, 1, "Batt", String(att.pbatt), "%");
 
-	traceLignes_NS();
-
 }
 
 void TLCD::afficheHT() {
+
+	float vmoy = 0.;
+	unsigned long int hrs = 0, mns = 0;
+	String mins = "00";
+
+	if (att.nbsec_act > MIN_POINTS) {
+		vmoy = att.dist / att.nbsec_act * 3.6;
+		hrs = (float)att.nbsec_act / 3600.;
+		mns = att.nbsec_act % 3600;
+		mns = mns / 60;
+		if (mns < 10) mins = "0";
+		else mins = "";
+		mins.append(String(mns));
+	}
 
 	cadranH(1, "Speed", String(att.cad_speed, 1), "km/h");
 	cadranH(2, "Pwr", String(att.pwr), "W");
@@ -351,21 +363,32 @@ void TLCD::afficheHT() {
 	cadran(3, 1, "CAD", String(att.cad_rpm), "rpm");
 	cadran(3, 2, "HRM", String(att.bpm), "bpm");
 
-	cadran(6, 1, "Vmoy", String(0., 2), "km/h");
-	cadran(6, 2, "Dur", String(0) + ":" + 0, 0);
-	cadran(7, 1, "Batt", String(att.pbatt), "%");
+	cadranH(4, "Dist", String(att.dist / 1000, 2), "km");
 
-	traceLignes_NS();
+	cadran(6, 1, "Vmoy", String(vmoy, 2), "km/h");
+	cadran(6, 2, "Dur", String(hrs) + ":" + mns, 0);
+	cadran(7, 1, "Batt", String(att.pbatt), "%");
 
 }
 
 void TLCD::afficheSegments(void) {
-	float vmoy = 0.;
+	float vmoy = 0., speed = 0.;
 	unsigned long int hrs = 0, mns = 0;
 	String mins = "00";
 
 	if (att.gps_src == 1) {
-		this->fillTriangle(220, 0, 240, 0, 240, 20, BLACK);
+		this->fillTriangle(230, 0, 240, 0, 240, 10, BLACK);
+	}
+
+	if (millis() - last_nrf_cad < CAD_SPEED_TIMEOUT_MS) {
+		// speed from CAD
+		speed =  att.cad_speed;
+	} else {
+		// speed from GPS
+		speed = att.speed;
+		if (_seg_act <= 1) {
+			this->fillTriangle(110, LCDHEIGHT / NB_LIG, 120, LCDHEIGHT / NB_LIG, 120, LCDHEIGHT / NB_LIG + 10, BLACK);
+		}
 	}
 
 	if (att.nbpts - MIN_POINTS > 0 && att.nbsec_act > MIN_POINTS) {

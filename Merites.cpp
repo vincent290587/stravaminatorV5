@@ -22,6 +22,9 @@ Merite::Merite() {
 	pr_won = 0;
 	puissance = 0.;
 	vit_asc = 0;
+
+    m_cad_speed_prev = 0;
+    m_ht_last_update_time = 0;
 }
 
 // GETTERS
@@ -43,10 +46,8 @@ float Merite::getPower() {
 // Mise a jour avec la pos GPS courante
 int Merite::majMerite(float lat, float lon, float ele) {
 
-	static float majDist = 0;
-	static int res;
-
-	res = 0;
+	float majDist = 0;
+	int res = 0;
 
 	if (last_stored_lat < -90.) {
 		// initialisation
@@ -63,6 +64,7 @@ int Merite::majMerite(float lat, float lon, float ele) {
 	// tous les X metres
 	if (majDist > DIST_RECORD) {
 		distance += majDist;
+		majDist = 0.;
 		last_stored_lat = lat;
 		last_stored_lon = lon;
 		res = 1;
@@ -132,7 +134,17 @@ void Merite::majPower(ListePoints *mes_points, float speed_) {
 		//Serial.println("testVit= " + String(vit_asc, 2));
 
 		// horizontal speed (m/s)
+		// TODO remove filtre sur cad_speed
+		if (m_cad_speed_prev > 15. &&
+				speed_ / m_cad_speed_prev > FILTRE_CAD_ACC) {
+			speed_ = m_cad_speed_prev;
+		} else if (speed_ < 45 &&
+				speed_ / m_cad_speed_prev > FILTRE_CAD_ACC) {
+			speed_ += 0.2 * (speed_ - m_cad_speed_prev);
+		}
+
 		fSpeed = speed_ / 3.6;
+		m_cad_speed_prev = speed_;
 
 		// STEP 2 : Calcul
 		puissance = 9.81 * MASSE * vit_asc; // grav
@@ -150,7 +162,9 @@ void Merite::majPower(ListePoints *mes_points, float speed_) {
 	return;
 }
 
-
+/**
+ *
+ */
 void Merite::simpLinReg(float* x, float* y, float* lrCoef, int n) {
 	// pass x and y arrays (pointers), lrCoef pointer, and n.  The lrCoef array is comprised of the slope=lrCoef[0] and intercept=lrCoef[1].  n is length of the x and y arrays.
 	// http://en.wikipedia.org/wiki/Simple_linear_regression
@@ -178,3 +192,45 @@ void Merite::simpLinReg(float* x, float* y, float* lrCoef, int n) {
 	lrCoef[1] = ybar - lrCoef[0] * xbar;
 }
 
+/**
+ *
+ */
+int Merite::majCRS(float cad_speed, int8_t hrm, uint16_t power) {
+
+	static float majDist = 0.;
+	static uint8_t is_init = 0;
+
+	if (is_init == 0) {
+		m_ht_last_update_time = millis();
+		is_init = 1;
+	}
+
+	// TODO remove filtre sur cad_speed
+	if (m_cad_speed_prev > 20. &&
+			cad_speed / m_cad_speed_prev > FILTRE_CAD_ACC) {
+		cad_speed = m_cad_speed_prev;
+	} else if (cad_speed < 40) {
+		cad_speed += 0.3 * (cad_speed - m_cad_speed_prev);
+	}
+
+	// integration trapezoidale
+	if (millis() - m_ht_last_update_time > 50) {
+		majDist += (cad_speed + m_cad_speed_prev) * (millis() - m_ht_last_update_time) / (2 * 3600);
+		m_cad_speed_prev = cad_speed;
+		m_ht_last_update_time = millis();
+	}
+
+	if (is_init++ >= 4) {
+
+		// maj distance
+		distance += majDist;
+		majDist = 0.;
+
+		is_init = 1;
+
+		return 1;
+	}
+
+
+	return 0;
+}
