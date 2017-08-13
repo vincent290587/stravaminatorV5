@@ -30,7 +30,7 @@ CFLAGS += -mthumb -mabi=aapcs
 #CFLAGS += -Wall -Og -g
 CFLAGS += -Wall -Ofast
 CFLAGS += -DF_CPU=96000000 -DUSB_SERIAL -DLAYOUT_US_ENGLISH -DUSING_MAKEFILE
-CFLAGS += -D__MK64FX512__ -D__MK6X__ -DARDUINO=10613 -DTEENSYDUINO=132
+CFLAGS += -D__MK64FX512__ -D__MK6X__ -DARDUINO=10803 -DTEENSYDUINO=137
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant
 # keep every function in separate section, this allows linker to discard unused ones
 CFLAGS += -MMD -ffunction-sections -fdata-sections -fno-strict-aliasing

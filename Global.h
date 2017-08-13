@@ -22,7 +22,7 @@
 
 #include "define.h"
 
-#define BATT_INT_RES                   0.433
+#define BATT_INT_RES                   0.1
 #define CAD_SPEED_TIMEOUT_MS           3000
 
 

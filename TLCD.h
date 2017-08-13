@@ -94,7 +94,7 @@ class TLCD : public TSharpMem, public IntelliScreen {
     void cadran(uint8_t p_lig, uint8_t p_col, const char *champ, String  affi, const char *p_unite);
     void cadranH(uint8_t p_lig, const char *champ, String  affi, const char *p_unite);
     void updatePos(float lat_, float lon_, float alt_);
-    void updateAll(SAttitude *att);
+    void updateAll();
     void updateScreen(void);
     void printBatt(void);
     void afficheSegments(void);
@@ -148,7 +148,6 @@ class TLCD : public TSharpMem, public IntelliScreen {
     void traceLignes_PAR(void);
 
     SBoot boot;
-    SAttitude att;
 
     uint8_t _ancs_mode;
     std::list<SNotif> l_notif;

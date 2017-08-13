@@ -176,13 +176,22 @@ uint8_t isLocOutdated() {
 
 void updateAltitudeOffset () {
 
-	float pressure;
-	// pressure est mis a jour ici
-	baro.getTempAndPressure(&att.temp, &pressure);
+	String notif = "Sea level press.: ";
+
 	// mise a jour de la pression au niveau de la mer
-	baro.seaLevelForAltitude(att.gpsalt, pressure);
-	// recalcul avec la premiere mise a jour
+	baro.seaLevelForAltitude(fabs(att.gpsalt) > 1500 ? 0 : att.gpsalt, fpressu.output());
+
+	// Display pressure at sea level
+	notif += int(baro.getSeaLevelPressure());
+	display.notifyANCS(1, "ENV", notif.c_str());
+
+	// recalcul avec la mise a jour
 	float corr_alt = baro.pressureToAltitude(fpressu.output());
+
+	notif = "Altitude: ";
+	notif += int(corr_alt);
+	display.notifyANCS(1, "ENV", notif.c_str());
+
 	// reset merites
 	cumuls.resetClimb(corr_alt);
 }

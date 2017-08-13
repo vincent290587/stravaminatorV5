@@ -1,12 +1,21 @@
 
-#include <math.h>
+#include "math.h"
+#include "Global.h"
 #include "Segment.h"
+
+using namespace mvc;
 
 Segment::Segment(void) {
   _actif = 0;
+  _elevTot = 0.;
+  _monStart = 0.;
+  _monCur = 0.;
+  _monAvance = 0.;
+  _monElev0 = 0.;
+  _monPElev = 0.;
 }
 
-Segment::Segment(const char *nom_seg) {
+Segment::Segment(const char *nom_seg) : Segment() {
   _actif = 0;
   if (nom_seg)
     _nomFichier = nom_seg;
@@ -241,6 +250,8 @@ void Segment::majPerformance(ListePoints *mes_points) {
         Serial.print(F("Desactivation pendant segment de "));
         Serial.print(_nomFichier);
         _actif = SEG_OFF;
+
+        display.notifyANCS(1, "SEG", "Seg desactive");
       }
 
     } else {
@@ -253,6 +264,8 @@ void Segment::majPerformance(ListePoints *mes_points) {
         Serial.print(F("Dernier point invalide !!!!!"));
         desallouerPoints();
         _actif = SEG_OFF;
+
+        display.notifyANCS(1, "SEG", "Dernier point invalide");
         return;
       }
 

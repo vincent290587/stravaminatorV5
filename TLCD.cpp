@@ -2,6 +2,9 @@
 #include "TLCD.h"
 #include "utils.h"
 #include "Segment.h"
+#include "Global.h"
+
+using namespace mvc;
 
 /* ************* */
 /* CONSTRUCTORS  */
@@ -56,7 +59,6 @@ void TLCD::updatePos(float lat_, float lon_, float alt_) {
 	_lat = lat_;
 	_lon = lon_;
 	_alt = alt_;
-
 }
 
 void TLCD::cadranH(uint8_t p_lig, const char *champ, String  affi, const char *p_unite) {
@@ -83,6 +85,10 @@ void TLCD::cadranH(uint8_t p_lig, const char *champ, String  affi, const char *p
 	setCursor(x + 105, y + 5);// y + 42
 
 	if (p_unite) print(p_unite);
+
+	// print delimiters
+	if (p_lig > 1) drawFastHLine(0, LCDHEIGHT / NB_LIG * (p_lig - 1), LCDWIDTH, BLACK);
+	if (p_lig < NB_LIG) drawFastHLine(0, LCDHEIGHT / NB_LIG * (p_lig), LCDWIDTH, BLACK);
 }
 
 
@@ -111,84 +117,17 @@ void TLCD::cadran(uint8_t p_lig, uint8_t p_col, const char *champ, String  affi,
 	setCursor(x + 95, y + 5); // y + 42
 
 	if (p_unite) print(p_unite);
+
+	// print delimiters
+	drawFastVLine(LCDWIDTH / 2, LCDHEIGHT / NB_LIG * (p_lig - 1), LCDHEIGHT / NB_LIG, BLACK);
+
+	if (p_lig > 1) drawFastHLine(LCDWIDTH * (p_col - 1) / 2, LCDHEIGHT / NB_LIG * (p_lig - 1), LCDWIDTH / 2, BLACK);
+	if (p_lig < NB_LIG) drawFastHLine(LCDWIDTH * (p_col - 1) / 2, LCDHEIGHT / NB_LIG * p_lig, LCDWIDTH / 2, BLACK);
 }
 
-void TLCD::traceLignes(void) {
 
-	if (getModeAffi() == MODE_PAR) {
-		traceLignes_PAR();
-		return;
-	}
-
-	switch (_seg_act) {
-	case 0:
-		traceLignes_NS();
-		break;
-	case 1:
-		traceLignes_1S();
-		break;
-	case 2:
-		traceLignes_2S();
-		break;
-	}
-
-}
-
-void TLCD::traceLignes_1S(void) {
-
-	uint8_t ind1;
-
-	drawFastVLine(LCDWIDTH / 2, 0, LCDHEIGHT / NB_LIG * 4, BLACK);
-
-	for (ind1 = 0; ind1 < NB_LIG - 1; ind1++) {
-		if (ind1 != NB_LIG - 3)
-			drawFastHLine(0, LCDHEIGHT / NB_LIG * (ind1 + 1), LCDWIDTH, BLACK);
-	}
-}
-
-void TLCD::traceLignes_2S(void) {
-
-	uint8_t ind1;
-
-	drawFastVLine(LCDWIDTH / 2, 0, LCDHEIGHT / NB_LIG * 2, BLACK);
-
-	for (ind1 = 0; ind1 < NB_LIG - 1; ind1++) {
-		if (ind1 != NB_LIG - 3 && ind1 != NB_LIG - 6)
-			drawFastHLine(0, LCDHEIGHT / NB_LIG * (ind1 + 1), LCDWIDTH, BLACK);
-	}
-}
-
-void TLCD::traceLignes_NS(void) {
-
-	uint8_t ind1;
-
-	drawFastVLine(LCDWIDTH / 2, 0, LCDHEIGHT * 4 / _nb_lignes_tot, BLACK);
-	drawFastVLine(LCDWIDTH / 2, LCDHEIGHT * 5 / _nb_lignes_tot, LCDHEIGHT, BLACK);
-
-	for (ind1 = 0; ind1 < NB_LIG - 1; ind1++)
-		drawFastHLine(0, LCDHEIGHT / NB_LIG * (ind1 + 1), LCDWIDTH, BLACK);
-
-}
-
-void TLCD::traceLignes_PAR(void) {
-
-	uint8_t ind1;
-
-	drawFastVLine(LCDWIDTH / 2, 0, LCDHEIGHT * 3 / _nb_lignes_tot, BLACK);
-
-	if (_seg_act == 0) {
-		drawFastVLine(LCDWIDTH / 2, LCDHEIGHT * 3 / _nb_lignes_tot, LCDHEIGHT / _nb_lignes_tot, BLACK);
-	}
-
-	for (ind1 = 0; ind1 < 4; ind1++)
-		drawFastHLine(0, LCDHEIGHT / NB_LIG * (ind1 + 1), LCDWIDTH, BLACK);
-
-
-}
-
-void TLCD::updateAll(SAttitude *att_) {
-	updatePos(att_->lat, att_->lon, att_->alt);
-	memcpy(&att, att_, sizeof(SAttitude));
+void TLCD::updateAll() {
+	updatePos(att.lat, att.lon, att.alt);
 }
 
 void TLCD::updateScreen(void) {
@@ -277,27 +216,12 @@ void TLCD::printBatt() {
 	// current
 	setTextSize(2);
 	setCursor(5, 5);
-	print(att.cbatt, att.cbatt > 10 ? 0 : 1);
+	print(att.cbatt, fabs(att.cbatt) > 10 ? 0 : 1);
 
 	// Battery voltage
 	setCursor(10, 20);
 	setTextSize(1);
 	print(att.vbatt);
-	//
-	//  // charge
-	//  if (nrf_gpio_pin_read(6)==HIGH) {
-	//    // VUSB present
-	//    setCursor(90, 22);
-	//    setTextSize(1);
-	//    if (nrf_gpio_pin_read(11)==LOW) {
-	//      // charge terminated
-	//      print("CHRG");
-	//    } else {
-	//      print("END");
-	//      neopix.setWeakNotify(WS_RED);
-	//    }
-	//
-	//  }
 
 }
 
@@ -408,7 +332,7 @@ void TLCD::afficheSegments(void) {
 		// ligne colonne
 		cadran(1, 1, "Dist", String(att.dist / 1000., 1), "km");
 		cadran(1, 2, "Pwr", String(att.pwr), "W");
-		cadran(2, 1, "Speed", String(att.speed, 1), "km/h");
+		cadran(2, 1, "Speed", String(speed, 1), "km/h");
 		cadran(2, 2, "Climb", String(att.climb, 0), "m");
 		cadran(3, 1, "CAD", String(att.cad_rpm), "rpm");
 		cadran(3, 2, "HRM", String(att.bpm), "bpm");
@@ -430,20 +354,18 @@ void TLCD::afficheSegments(void) {
 
 		cadran(7, 2, "Time", String(hrs) + ":" + mins, 0);
 
-		traceLignes();
 	} else if (_seg_act == 1) {
 
 		_nb_lignes_tot = 7;
+
 		cadran(1, 1, "Dist", String(att.dist / 1000., 1), "km");
 		cadran(1, 2, "Pwr", String(att.pwr), "W");
-		cadran(2, 1, "Speed", String(att.speed, 1), "km/h");
+		cadran(2, 1, "Speed", String(speed, 1), "km/h");
 		cadran(2, 2, "Climb", String(att.climb, 0), "m");
 		cadran(3, 1, "CAD", String(att.cad_rpm), "rpm");
 		cadran(3, 2, "HRM", String(att.bpm), "bpm");
 		cadran(4, 1, "PR", String(att.nbpr), 0);
 		cadran(4, 2, "VA", String(att.vit_asc * 3.600, 1), "km/h");
-
-		traceLignes();
 
 		if (_l_seg[0]->getStatus() != SEG_OFF) {
 			partner(_l_seg[0]->getAvance(), _l_seg[0]->getCur(), NB_LIG);
@@ -456,9 +378,9 @@ void TLCD::afficheSegments(void) {
 
 		_nb_lignes_tot = 8;
 		// ligne colonne
-		cadran(1, 1, "Speed", String(att.speed, 1), "km/h");
+		cadran(1, 1, "Speed", String(speed, 1), "km/h");
 		cadran(1, 2, "Pwr", String(att.pwr), "W");
-		cadran(2, 1, "CAD", String(att.cad_rpm), "rpm");
+		cadran(2, 1, "VA", String(att.vit_asc * 3.600, 1), "km/h");
 		cadran(2, 2, "HRM", String(att.bpm), "bpm");
 
 
@@ -467,7 +389,6 @@ void TLCD::afficheSegments(void) {
 
 		partner(_l_seg[1]->getAvance(), _l_seg[1]->getCur(), NB_LIG);
 		afficheListePoints(NB_LIG - 2, 1, 0);
-		traceLignes();
 
 	}
 }
@@ -508,7 +429,6 @@ void TLCD::afficheParcours(void) {
 
 		afficheListeParcours(NB_LIG - 2);
 
-		traceLignes();
 	} else {
 
 		_nb_lignes_tot = 7;
@@ -525,7 +445,6 @@ void TLCD::afficheParcours(void) {
 
 		partner(_l_seg[0]->getAvance(), _l_seg[0]->getCur(), 4);
 
-		traceLignes();
 	}
 }
 
@@ -568,7 +487,7 @@ void TLCD::partner(float rtime, float curtime, uint8_t ligne) {
 	drawFastVLine(LCDWIDTH / 2 + dixP, hl + 2, 7, BLACK);
 
 	fillTriangle(centre - 7, hl + 7, centre, hl - 7, centre + 7, hl + 7, BLACK);
-	setCursor(centre - 13, hl + 15);
+	setCursor(centre - 15, hl + 12);
 	setTextSize(NB_LIG > 7 ? 1 : 2);
 	setTextColor(CLR_NRM); // 'inverted' text
 	print(String((int)(indice * 100.)));
@@ -607,6 +526,10 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
 
 	uint16_t debut_cadran = LCDHEIGHT / NB_LIG * (ligne - 1);
 	uint16_t fin_cadran   = LCDHEIGHT / NB_LIG * (ligne + 1);
+
+	// print delimiters
+	if (ligne > 1) drawFastHLine(0, debut_cadran, LCDWIDTH, BLACK);
+	if (ligne < NB_LIG) drawFastHLine(0, fin_cadran, LCDWIDTH, BLACK);
 
 	// on cherche la taille de fenetre
 	liste = _l_seg[ind_seg]->getListePoints();
@@ -803,6 +726,10 @@ void TLCD::afficheListeParcours(uint8_t ligne) {
 
 	uint16_t debut_cadran = LCDHEIGHT / NB_LIG * (ligne - 1);
 	uint16_t fin_cadran   = LCDHEIGHT / NB_LIG * (ligne + 2);
+
+	// print delimiters
+	if (ligne > 1) drawFastHLine(0, debut_cadran, LCDWIDTH, BLACK);
+	if (ligne < NB_LIG) drawFastHLine(0, fin_cadran, LCDWIDTH, BLACK);
 
 	// init
 	liste = _parc->getListePoints();

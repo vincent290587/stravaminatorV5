@@ -317,7 +317,7 @@ void loop() {
 
 	// get power data
 	att.cbatt = stc_cur.output();
-	att.vbatt = stc.getCorrectedVoltage(0.433);
+	att.vbatt = stc.getCorrectedVoltage(BATT_INT_RES);
 	att.pbatt = percentageBatt(att.vbatt);
 
 	// get altitude data
@@ -390,7 +390,7 @@ void loop() {
 
 		if (updateLocData()) {
 			// no useable LOC
-			display.updateAll(&att);
+			display.updateAll();
 			goto piege;
 		}
 
@@ -407,7 +407,7 @@ void loop() {
 		if (att.nbpts < MIN_POINTS) {
 
 			// maj sharp
-			display.updateAll(&att);
+			display.updateAll();
 			goto piege;
 
 		} else if (att.nbpts == MIN_POINTS) {
@@ -455,7 +455,7 @@ void loop() {
 	case MODE_GPS:
 	case MODE_CRS:
 	case MODE_PAR:
-		display.updateAll(&att);
+		display.updateAll();
 		break;
 
 	case MODE_HT:
@@ -532,13 +532,12 @@ int main () {
 }
 
 void idle() {
-	set_sleep_mode(SLEEP_MODE_IDLE);
+	set_sleep_mode(SLEEP_MODE_PWR_SAVE);
 	noInterrupts();
 	sleep_enable();
 	interrupts();
-	asm("wfi");
+	sleep_cpu();
 	sleep_disable();
-	yield();
 }
 
 void usage_fault_isr(void) {

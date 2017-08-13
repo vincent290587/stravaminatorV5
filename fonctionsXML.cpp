@@ -1,5 +1,5 @@
 
-
+#include "Global.h"
 #include "fonctionsXML.h"
 
 using namespace mvc;
@@ -355,6 +355,8 @@ float watchdog(Segment *mon_seg, float lat1, float long1) {
 			loggerMsg(String(tmp_dist, 1).c_str());
 			mon_seg->desallouerPoints();
 			mon_seg->setStatus(SEG_OFF);
+
+			display.notifyANCS(1, "WTCH", "Seg trop loin");
 		}
 	}
 

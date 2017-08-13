@@ -18,8 +18,8 @@
 
 using namespace std;
 
-#define MARGE_DESACT  1.
-#define MARGE_ACT     1.
+#define MARGE_DESACT  2.
+#define MARGE_ACT     1.5
 #define DIST_ACT     50.
 
 #define PSCAL_LIM    0.

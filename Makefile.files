@@ -10,6 +10,9 @@ SRC_FILES +=  \
   $(LIB_DIRECTORY)/Adafruit_GFX_Library/glcdfont.c \
   $(wildcard $(LIB_DIRECTORY)/SdFat/*.cpp) \
   $(wildcard $(LIB_DIRECTORY)/SdFat/utility/*.cpp) \
+  $(wildcard $(LIB_DIRECTORY)/Snooze/*.cpp) \
+  $(wildcard $(LIB_DIRECTORY)/Snooze/utility/*.c) \
+  $(wildcard $(LIB_DIRECTORY)/Snooze/utility/*.cpp) \
   $(LIB_DIRECTORY)/SPI/SPI.cpp \
   $(LIB_DIRECTORY)/Wire/Wire.cpp \
   $(LIB_DIRECTORY)/Wire/utility/twi.c \
@@ -27,9 +30,12 @@ INC_FOLDERS += \
   $(SRC_DIRECTORY) \
   $(LIB_DIRECTORY)/TinyGPSPlus \
   $(LIB_DIRECTORY)/Adafruit_GFX_Library  \
+  $(LIB_DIRECTORY)/Adafruit_GFX_Library\Fonts  \
   $(LIB_DIRECTORY)/Adafruit_Unified_Sensor \
   $(LIB_DIRECTORY)/SdFat \
   $(LIB_DIRECTORY)/SdFat/utility \
+  $(LIB_DIRECTORY)/Snooze \
+  $(LIB_DIRECTORY)/Snooze/utility \
   $(LIB_DIRECTORY)/SPI  \
   $(LIB_DIRECTORY)/Wire  \
   $(LIB_DIRECTORY)/Wire/utility \
