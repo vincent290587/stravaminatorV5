@@ -12,12 +12,16 @@ using namespace mvc;
 void service_peripherals (uint8_t force) {
 
 	static uint32_t millis_;
+	static uint8_t nb_passages = 0;
 
 	if (display.getPendingAction() != NO_ACTION) {
 		display.updateScreen();
 	}
 
 	if (millis() - millis_ > PERIPHERALS_SERVICE_TIMEOUT || force) {
+
+		nb_passages++;
+		nb_passages = nb_passages % 10;
 
 		// save time
 		millis_ = millis();
@@ -31,14 +35,15 @@ void service_peripherals (uint8_t force) {
 
 		// Power measurements
 		stc.refresh();
-		stc_cur.input(stc.getCurrent());
+	    stc_cur.input(stc.getCurrent());
 
-		// barometric meausurements
-		float pressure = 0.;
-		baro.getTempAndPressure(&att.temp, &pressure);
-		fpressu.input(pressure);
+		if (nb_passages % 2 == 0) {
+			// barometric meausurements
+			float pressure = 0.;
+			baro.getTempAndPressure(&att.temp, &pressure);
+			fpressu.input(pressure);
+		}
 
-		//Serial.println(String("Pressure: ") + String(fpressu.output(), 2));
 	}
 
 

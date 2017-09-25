@@ -19,6 +19,7 @@
 #include "Segment.h"
 #include "Parcours.h"
 #include "Filter.h"
+#include "Snooze.h"
 
 #include "define.h"
 
@@ -27,6 +28,12 @@
 
 
 namespace mvc {
+
+extern SnoozeDigital digital;
+extern SnoozeTimer timer;
+extern SnoozeUSBSerial usb;
+
+extern SnoozeBlock config_teensy35;
 
 // set up variables using the SD utility library functions:
 extern SdFat sd;

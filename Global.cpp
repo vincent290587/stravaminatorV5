@@ -21,6 +21,12 @@ const float vspeed_coefficients[10] =
 
 namespace mvc {
 
+SnoozeDigital digital;
+SnoozeTimer timer;
+SnoozeUSBSerial usb;
+
+SnoozeBlock config_teensy35(usb, timer, digital);
+
 // set up variables using the SD utility library functions:
 SdFat sd;
 SdFile file;

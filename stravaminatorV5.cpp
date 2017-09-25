@@ -17,7 +17,7 @@ using namespace mvc;
 
 void setup() {
 	att.has_started = 0;
-	// initialize the digital pin as an output.
+
 	Serial.begin(115200);
 	Serial3.begin(115200);
 	//Serial3.attachRts(2);
@@ -26,6 +26,16 @@ void setup() {
 #ifdef __DEBUG__
 	digitalWriteFast(led, HIGH);
 #endif
+
+	// snooze
+	timer.setTimer(50);// milliseconds
+	/********************************************************
+	     Define digital pins for waking the teensy up. This
+	     combines pinMode and attachInterrupt in one function.
+	 ********************************************************/
+	digital.pinMode(0, INPUT_PULLUP, FALLING);//pin, mode, type
+	digital.pinMode(7, INPUT_PULLUP, FALLING);//pin, mode, type
+
 
 	is_gps_awake = 1;
 
@@ -543,8 +553,9 @@ void loop() {
 		// gather measurements
 		service_peripherals();
 
-		// sleep
-		idle();
+		// TODO sleep
+		Snooze.idle(config_teensy35);
+		//idle();
 	}
 
 }

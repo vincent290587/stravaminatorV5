@@ -246,11 +246,19 @@ void loggerHT() {
 			header_ecrit = 1;
 		}
 
-		// corps
-		gpx.print(att.bpm); gpx.print(",");
+		String _line = "";
 
-		gpx.print(att.cad_rpm); gpx.print(",");
+		_line += String(att.bpm) + ",";
+		_line += String(att.cad_rpm) + ",";
+		_line += String(att.temp, 1) + ",";
+		_line += String(att.vbatt, 3) + ",";
+		_line += String(att.cbatt, 3) + ",";
+		_line += String(att.secj_prec) + ",";
+		_line += String(att.cad_speed, 2) + ",";
+		_line += String(att.power, 1) + ",";
+		_line += String(time_c);
 
+		gpx.println(_line);
 		//TODO implement ANT-FEC
 
 		// fclose
