@@ -27,6 +27,9 @@ void setup() {
 	digitalWriteFast(led, HIGH);
 #endif
 
+	is_gps_awake = 1;
+
+	is_cad_init = 0;
 	last_nrf_cad = millis();
 
 	// pseudo boutons
@@ -283,6 +286,7 @@ void loop() {
 	if (new_cad_data && nordic.getCadSpeed() > 0.) {
 		att.cad_speed = (float)nordic.getCadSpeed() / 1000.;
 		last_nrf_cad = millis();
+		is_cad_init = 1;
 	} else if (millis() - last_nrf_cad > CAD_SPEED_TIMEOUT_MS) {
 		// if no event were recived from the CAD, set the speed to 0
 		att.cad_speed = 0.;
@@ -388,6 +392,16 @@ void loop() {
 
 	case MODE_CRS:
 
+		if (mode_simu) {
+			if (is_gps_awake) {
+				gps.sendCommand(PMTK_STANDBY);
+				is_gps_awake = 0;
+			}
+		} else if (!is_gps_awake) {
+			gps.sendCommand(PMTK_AWAKE);
+			is_gps_awake = 1;
+		}
+
 		if (updateLocData()) {
 			// no useable LOC
 			display.updateAll();
@@ -433,8 +447,10 @@ void loop() {
 			att.nbsec_act += att.secj - att.secj_prec;
 			att.secj_prec = att.secj;
 
-		} else if (att.speed < 3. && att.cad_speed < 3.) {
+		} else if ((!is_cad_init && att.speed < 3.) ||
+				(is_cad_init && att.cad_speed < 3.)) {
 
+			// a l'arret
 			att.secj_prec = att.secj;
 
 		}
@@ -459,6 +475,11 @@ void loop() {
 		break;
 
 	case MODE_HT:
+
+		if (is_gps_awake) {
+			gps.sendCommand(PMTK_STANDBY);
+			is_gps_awake = 0;
+		}
 
 		att.secj = millis() / 1000;
 
@@ -485,6 +506,11 @@ void loop() {
 		boucle_simu();
 		// no break
 	case MODE_HRM:
+
+		if (is_gps_awake) {
+			gps.sendCommand(PMTK_STANDBY);
+			is_gps_awake = 0;
+		}
 
 		att.secj = millis() / 1000;
 

@@ -200,6 +200,10 @@ int Merite::majCRS(float cad_speed, int8_t hrm, uint16_t power) {
 	static float majDist = 0.;
 	static uint8_t is_init = 0;
 
+	if (cad_speed > 100.) {
+		cad_speed = 0;
+	}
+
 	if (is_init == 0) {
 		m_ht_last_update_time = millis();
 		is_init = 1;

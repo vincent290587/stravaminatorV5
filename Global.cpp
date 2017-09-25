@@ -92,6 +92,8 @@ uint8_t download_request = 0;
 uint8_t upload_request = 0;
 uint8_t mode_simu = 0;
 uint8_t alertes_nb = 0;
+uint8_t is_cad_init = 0;
+uint8_t is_gps_awake = 1;
 }
 
 Global::Global() {

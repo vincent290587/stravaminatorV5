@@ -9,7 +9,7 @@ int percentageBatt (float tensionValue) {
 	float fp_ = 0.;
 
 	if (tensionValue > 3.78) {
-		fp_ = 536.34*tensionValue*tensionValue*tensionValue-6723.8*tensionValue*tensionValue;
+		fp_ = 536.24*tensionValue*tensionValue*tensionValue-6723.8*tensionValue*tensionValue;
 		fp_ += 28186*tensionValue-39402;
 
 		if (fp_ > 100.) fp_ = 100.;

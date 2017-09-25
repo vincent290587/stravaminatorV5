@@ -98,6 +98,8 @@ extern uint8_t download_request;
 extern uint8_t upload_request;
 extern uint8_t mode_simu;
 extern uint8_t alertes_nb;
+extern uint8_t is_cad_init;
+extern uint8_t is_gps_awake;
 }
 
 

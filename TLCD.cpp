@@ -291,7 +291,9 @@ void TLCD::afficheHT() {
 
 	cadran(6, 1, "Vmoy", String(vmoy, 2), "km/h");
 	cadran(6, 2, "Dur", String(hrs) + ":" + mns, 0);
+
 	cadran(7, 1, "Batt", String(att.pbatt), "%");
+	cadran(7, 2, "Cur", String((int)att.cbatt), "mA");
 
 }
 
