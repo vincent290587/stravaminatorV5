@@ -114,7 +114,7 @@ void setup() {
 	digitalWriteFast(memHold, HIGH);
 #endif
 
-	if (!sd.begin(sd_cs, SPI_HALF_SPEED)) {
+	if (!SD.begin(sd_cs)) {
 		Serial.println(F("Card initialization failed."));
 		display.setSD(-1);
 		display.updateScreen();

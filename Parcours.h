@@ -23,6 +23,7 @@ class Parcours {
   public:
     Parcours(void);
     Parcours(const char *nom_seg);
+    Parcours(String nom_seg);
     void setParcoursName(const char *name_);
     void emptyName();
     void desallouerPoints(void);
@@ -38,10 +39,14 @@ class Parcours {
     ListePoints *getListePoints() {
       return &_lpts;
     }
-    int nomCorrect();
+    int isNomCorrect();
     static int nomCorrect(const char *chaine) {
       Parcours tmp(chaine);
-      return tmp.nomCorrect();
+      return tmp.isNomCorrect();
+    }
+    static int nomCorrect(String chaine) {
+    	Parcours tmp(chaine);
+    	return tmp.isNomCorrect();
     }
     Point *getFirstPoint();
     float dist(Point *p) {

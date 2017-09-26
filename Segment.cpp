@@ -21,6 +21,11 @@ Segment::Segment(const char *nom_seg) : Segment() {
     _nomFichier = nom_seg;
 }
 
+Segment::Segment(String nom_seg) : Segment() {
+  _actif = 0;
+  _nomFichier = nom_seg;
+}
+
 ListeSegments::ListeSegments(void) {
 
 }

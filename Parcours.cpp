@@ -10,6 +10,11 @@ Parcours::Parcours(const char *nom_seg) {
 		_nomFichier = nom_seg;
 }
 
+Parcours::Parcours(String nom_seg) {
+	if (nom_seg.length() > 4)
+		_nomFichier = nom_seg;
+}
+
 ListeParcours::ListeParcours(void) {
 
 }
@@ -80,7 +85,7 @@ Vecteur Parcours::posAuParcours(Point point) {
 }
 
 
-int Parcours::nomCorrect() {
+int Parcours::isNomCorrect() {
 
 	if (_nomFichier.length() == 0) {
 		return 0;

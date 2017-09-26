@@ -8,29 +8,37 @@ using namespace mvc;
 // en listant les fichiers sur la SD
 void initListeSegments() {
 
-	static char chaine[20];
+	//static char chaine[20];
+	String name = "";
 	Parcours *par_ = NULL;
 
 	Serial.flush();
 	Serial.println(F("Fichiers ajoutes:"));
 	Serial.flush();
 
-	if (file.isOpen())
-		file.close();
+	file.close();
 
-	while (file.openNext(sd.vwd(), O_READ)) {
+	File root = SD.open("/");
 
-		if (file.isFile()) {
+	while (1) {
+
+		file =  root.openNextFile();
+		if (!file) {
+			return;
+		}
+
+		if (!file.isDirectory()) {
 			// Indicate not a directory.
-			file.getFilename(chaine);
-			Serial.print(chaine);
-			if (Segment::nomCorrect(chaine)) {
+			name = file.name();
+
+			Serial.print(name);
+			if (Segment::nomCorrect(name)) {
 				Serial.println(F("  ajoute"));
-				mes_segments.push_back(Segment(chaine));
-			} else if (Parcours::nomCorrect(chaine)) {
+				mes_segments.push_back(Segment(name));
+			} else if (Parcours::nomCorrect(name)) {
 				// pas de chargement en double
 				Serial.println(F(": parcours trouve"));
-				mes_parcours.push_back(Parcours(chaine));
+				mes_parcours.push_back(Parcours(name));
 				par_ = mes_parcours.getLastParcours();
 				if (chargerPAR(par_) == 0) {
 					display.registerParcours(par_);
@@ -45,8 +53,7 @@ void initListeSegments() {
 		}
 
 
-		if (file.isOpen())
-			file.close();
+		file.close();
 	}
 
 	return;
@@ -63,16 +70,17 @@ int chargerCRS(Segment *mon_segment) {
 	res = 0;
 	time_start = 0.;
 
-	if (file.isOpen()) {
-		file.close();
-	}
+	file.close();
+
 	if (mon_segment) {
 
 		Serial.print(F("chargerCRS: ")); Serial.println(mon_segment->getName());
 		Serial.print(F("Nb points: ")); Serial.println(mon_segment->longueur());
 		Serial.flush();
 
-		if (!file.open(mon_segment->getName(), O_READ)) {
+		file =  SD.open(mon_segment->getName(), O_READ);
+
+		if (!file) {
 			// echec d'ouverture
 			Serial.print(F("cFichier introuvable:"));
 			Serial.flush();
@@ -81,7 +89,7 @@ int chargerCRS(Segment *mon_segment) {
 		}
 
 
-		while (file.fgets(chaine, TAILLE_LIGNE - 1, NULL)) {
+		while (file.read(chaine, TAILLE_LIGNE - 1)) {
 
 			// on se met au bon endroit
 			if (strstr(chaine, "<")) {
@@ -94,9 +102,7 @@ int chargerCRS(Segment *mon_segment) {
 
 		} // fin du fichier
 
-		if (file.isOpen()) {
-			file.close();
-		}
+		file.close();
 
 		Serial.println(F("Chargement effectue !"));
 		Serial.print(F("Nb points: ")); Serial.println(mon_segment->longueur());
@@ -115,9 +121,8 @@ int chargerPAR(Parcours *mon_parcours) {
 
 	res = 0;
 
-	if (file.isOpen()) {
-		file.close();
-	}
+	file.close();
+
 	if (mon_parcours) {
 
 #ifdef __DEBUG__
@@ -126,7 +131,9 @@ int chargerPAR(Parcours *mon_parcours) {
 		Serial.flush();
 #endif
 
-		if (!file.open(mon_parcours->getName(), O_READ)) {
+		file =  SD.open(mon_parcours->getName(), O_READ);
+
+		if (!file) {
 			// echec d'ouverture
 			Serial.print(F("Fichier introuvable:"));
 			Serial.flush();
@@ -135,7 +142,7 @@ int chargerPAR(Parcours *mon_parcours) {
 		}
 
 
-		while (file.fgets(chaine, TAILLE_LIGNE - 1, NULL)) {
+		while (file.read(chaine, TAILLE_LIGNE - 1)) {
 
 			// on se met au bon endroit
 			if (strstr(chaine, "<")) {
@@ -148,9 +155,8 @@ int chargerPAR(Parcours *mon_parcours) {
 
 		} // fin du fichier
 
-		if (file.isOpen()) {
-			file.close();
-		}
+		file.close();
+
 
 #ifdef __DEBUG__
 		Serial.println(F("Chargement effectue !"));

@@ -5,7 +5,7 @@
 
 
 #include <Adafruit_GFX.h>
-#include <SdFat.h>
+#include <SD.h>
 #include <AltiBaro.h>
 #include "myGPS.h"
 #include <STC3100.h>
@@ -36,9 +36,8 @@ extern SnoozeUSBSerial usb;
 extern SnoozeBlock config_teensy35;
 
 // set up variables using the SD utility library functions:
-extern SdFat sd;
-extern SdFile file;
-extern SdFile gpx;
+extern File file;
+extern File gpx;
 
 extern TLCD display;
 

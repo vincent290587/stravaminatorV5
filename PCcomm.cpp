@@ -8,11 +8,12 @@ int PChisto() {
 
 	char chaine[TAILLE_LIGNE];
 
-	if (file.isOpen()) {
+	if (file) {
 		file.close();
 	}
 
-	if (!file.open("TODAY.CSV", O_READ)) {
+	file = SD.open("TODAY.CSV", O_READ);
+	if (!file) {
 		// echec d'ouverture
 		return 1;
 	}
@@ -22,7 +23,7 @@ int PChisto() {
 	Serial1.end();
 	Serial3.end();
 
-	while (file.fgets(chaine, TAILLE_LIGNE - 1, NULL)) {
+	while (file.read(chaine, TAILLE_LIGNE - 1)) {
 
 		Serial.print(chaine);
 		do {
@@ -34,7 +35,7 @@ int PChisto() {
 
 	} // fin du fichier
 
-	if (file.isOpen()) {
+	if (file) {
 		file.close();
 	}
 

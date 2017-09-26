@@ -42,6 +42,7 @@ class Segment {
   public:
     Segment(void);
     Segment(const char *nom_seg);
+    Segment(String nom_seg);
     void setSegmentName(const char *name_);
     void emptyName();
     void desallouerPoints(void);
@@ -68,6 +69,10 @@ class Segment {
     static int nomCorrect(const char *chaine) {
       Segment tmpseg(chaine);
       return tmpseg.nomCorrect();
+    }
+    static int nomCorrect(String chaine) {
+    	Segment tmpseg(chaine);
+    	return tmpseg.nomCorrect();
     }
     void majPerformance(ListePoints *mes_points);
     Point *getFirstPoint();

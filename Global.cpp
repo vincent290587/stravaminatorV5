@@ -28,9 +28,9 @@ SnoozeUSBSerial usb;
 SnoozeBlock config_teensy35(usb, timer, digital);
 
 // set up variables using the SD utility library functions:
-SdFat sd;
-SdFile file;
-SdFile gpx;
+//SdFat sd;
+File file;
+File gpx;
 
 TLCD display(sharp_cs);
 
