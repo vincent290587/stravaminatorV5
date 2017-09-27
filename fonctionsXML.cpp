@@ -18,11 +18,11 @@ void initListeSegments() {
 	if (file.isOpen())
 		file.close();
 
-	while (file.openNext(sd.vwd(), O_READ)) {
+	while (file.openNext(SD.vwd(), O_READ)) {
 
 		if (file.isFile()) {
 			// Indicate not a directory.
-			file.getFilename(chaine);
+			file.getName(chaine, 20);
 			Serial.print(chaine);
 			if (Segment::nomCorrect(chaine)) {
 				Serial.println(F("  ajoute"));
@@ -79,7 +79,6 @@ int chargerCRS(Segment *mon_segment) {
 			Serial.println(mon_segment->getName());
 			return 1;
 		}
-
 
 		while (file.fgets(chaine, TAILLE_LIGNE - 1, NULL)) {
 

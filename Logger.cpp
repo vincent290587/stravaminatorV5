@@ -373,8 +373,8 @@ void effacerHisto() {
 
 	if (gpx.isOpen()) gpx.close();
 
-	if (sd.exists("today.csv")) {
-		if (sd.remove("today.csv")) {
+	if (SD.exists("today.csv")) {
+		if (SD.remove("today.csv")) {
 			Serial.println("Effacement historique");
 		} else {
 			Serial.println("Echec effacement historique");

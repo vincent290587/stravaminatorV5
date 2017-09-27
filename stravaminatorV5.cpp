@@ -114,7 +114,8 @@ void setup() {
 	digitalWriteFast(memHold, HIGH);
 #endif
 
-	if (!sd.begin(sd_cs, SPI_HALF_SPEED)) {
+	if (!SD.begin(sd_cs, SPI_HALF_SPEED))
+		{
 		Serial.println(F("Card initialization failed."));
 		display.setSD(-1);
 		display.updateScreen();
@@ -550,6 +551,8 @@ void loop() {
 
 	while (cond_wait() == 1) {
 
+		mtpd.loop();
+
 		// gather measurements
 		service_peripherals();
 
@@ -564,6 +567,7 @@ void loop() {
 int main () {
 	setup();
 	while (1) {
+		mtpd.loop();
 		loop();
 	}
 }

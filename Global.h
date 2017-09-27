@@ -20,6 +20,8 @@
 #include "Parcours.h"
 #include "Filter.h"
 #include "Snooze.h"
+#include "MTP.h"
+
 
 #include "define.h"
 
@@ -27,7 +29,13 @@
 #define CAD_SPEED_TIMEOUT_MS           3000
 
 
+extern SdFat SD;
+
+
 namespace mvc {
+
+extern MTPStorage_SD storage;
+extern MTPD          mtpd;
 
 extern SnoozeDigital digital;
 extern SnoozeTimer timer;
@@ -36,7 +44,6 @@ extern SnoozeUSBSerial usb;
 extern SnoozeBlock config_teensy35;
 
 // set up variables using the SD utility library functions:
-extern SdFat sd;
 extern SdFile file;
 extern SdFile gpx;
 
