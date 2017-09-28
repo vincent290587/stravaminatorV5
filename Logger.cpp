@@ -1,5 +1,6 @@
 #include "Global.h"
 #include "Logger.h"
+#include "SerialFlash.h"
 
 using namespace mvc;
 

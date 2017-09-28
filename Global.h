@@ -10,7 +10,6 @@
 #include "myGPS.h"
 #include <STC3100.h>
 #include <Nordic.h>
-#include <SerialFlash.h>
 #include "DisplayManager.h"
 #include "Merites.h"
 #include "ListePoints.h"
