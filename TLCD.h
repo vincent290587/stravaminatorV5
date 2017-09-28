@@ -134,7 +134,6 @@ class TLCD : public TSharpMem, public IntelliScreen {
     void afficheListeParcours(uint8_t ligne);
     void partner(float rtime, float curtime, uint8_t ind);
 
-
     void afficheBoot();
     void afficheGPS();
     void afficheHT();
@@ -149,12 +148,6 @@ class TLCD : public TSharpMem, public IntelliScreen {
     uint8_t _ss, _seg_act, _par_act;
 
   private:
-    void traceLignes(void);
-    void traceLignes_NS(void);
-    void traceLignes_1S(void);
-    void traceLignes_2S(void);
-    void traceLignes_PAR(void);
-
     SBoot boot;
 
     uint8_t _ancs_mode;

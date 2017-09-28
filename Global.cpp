@@ -24,11 +24,11 @@ namespace mvc {
 MTPStorage_SD storage;
 MTPD          mtpd(&storage);
 
-SnoozeDigital digital;
+//SnoozeDigital digital;
 SnoozeTimer timer;
 SnoozeUSBSerial usb;
 
-SnoozeBlock config_teensy35(usb, timer, digital);
+SnoozeBlock config_teensy35(usb, timer);
 
 // set up variables using the SD utility library functions:
 SdFile file;
@@ -89,6 +89,7 @@ uint32_t last_true_gps = 0;
 uint32_t last_nrf_gps = 0;
 uint32_t last_nrf_cad;
 
+uint8_t loop_save_power = 0;
 uint8_t new_gps_data = 0;
 uint8_t new_gpsn_data = 0;
 uint8_t new_hrm_data = 0;

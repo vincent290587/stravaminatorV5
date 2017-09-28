@@ -18,6 +18,8 @@
 #include "Parcours.h"
 #include "Filter.h"
 #include "Snooze.h"
+#include "PCComm.h"
+#include "Logger.h"
 #include "MTP.h"
 
 
@@ -35,7 +37,7 @@ namespace mvc {
 extern MTPStorage_SD storage;
 extern MTPD          mtpd;
 
-extern SnoozeDigital digital;
+//extern SnoozeDigital digital;
 extern SnoozeTimer timer;
 extern SnoozeUSBSerial usb;
 
@@ -99,6 +101,7 @@ extern uint32_t last_true_gps;
 extern uint32_t last_nrf_gps;
 extern uint32_t last_nrf_cad;
 
+extern uint8_t loop_save_power;
 extern uint8_t new_gps_data;
 extern uint8_t new_gpsn_data;
 extern uint8_t new_hrm_data;

@@ -16,8 +16,7 @@ SRC_FILES +=  \
   $(wildcard $(LIB_DIRECTORY)/Snooze/utility/*.cpp) \
   $(LIB_DIRECTORY)/SPI/SPI.cpp \
   $(wildcard $(LIB_DIRECTORY)/MTP/*.cpp) \
-  $(LIB_DIRECTORY)/Wire/Wire.cpp \
-  $(LIB_DIRECTORY)/Wire/utility/twi.c \
+  $(LIB_DIRECTORY)/i2c_t3/i2c_t3.cpp \
   $(LIB_DIRECTORY)/AltiBaro/Altibaro.cpp \
   $(LIB_DIRECTORY)/BaroSensor/BaroSensor.cpp \
   $(LIB_DIRECTORY)/Adafruit_GPS_Library/Adafruit_GPS.cpp \
@@ -42,8 +41,7 @@ INC_FOLDERS += \
   $(LIB_DIRECTORY)/Snooze/utility \
   $(LIB_DIRECTORY)/SPI  \
   $(LIB_DIRECTORY)/MTP  \
-  $(LIB_DIRECTORY)/Wire  \
-  $(LIB_DIRECTORY)/Wire/utility \
+  $(LIB_DIRECTORY)/i2c_t3  \
   $(LIB_DIRECTORY)/AltiBaro \
   $(LIB_DIRECTORY)/BaroSensor  \
   $(LIB_DIRECTORY)/Adafruit_GPS_Library  \
