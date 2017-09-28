@@ -254,7 +254,7 @@ void DisplayManager::runAffi(bool force) {
 			}
 		}
 
-		switch (getModeAffi()) {
+		switch (this->getModeAffi()) {
 		case MODE_SD:
 			this->afficheBoot();
 			break;

@@ -111,7 +111,7 @@ void service_peripherals (uint8_t force) {
 	static uint32_t millis_;
 	static uint8_t nb_passages = 0;
 
-	if (millis() - millis_ > PERIPHERALS_SERVICE_TIMEOUT || force) {
+	if (millis() - millis_ >= PERIPHERALS_SERVICE_TIMEOUT || force) {
 
 		nb_passages++;
 		nb_passages = nb_passages % 10;

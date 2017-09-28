@@ -187,7 +187,7 @@ void setup() {
 
 	att.has_started = 1;
 
-//	myTimer.begin(stop_power_save, 50000);
+	myTimer.begin(stop_power_save, 50000);
 
 #ifdef __DEBUG__
 	digitalWriteFast(led, LOW);
@@ -225,12 +225,12 @@ void loop() {
 		service_peripherals();
 
 		// child loop more efficient
-		loop_save_power = 1;
-		while (loop_save_power) {
+		loop_save_power = 0;
+		do {
 			// TODO sleep
-			//Snooze.idle(config_teensy35);
-			idle();
-		}
+			Snooze.idle(config_teensy35);
+//			idle();
+		} while (loop_save_power);
 
 	}
 
