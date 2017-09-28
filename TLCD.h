@@ -2,8 +2,8 @@
 #ifndef _TLCD_
 #define _TLCD_
 
-#include <IntelliScreen.h>
 #include "TSharpMem.h"
+#include "IntelliScreen.h"
 #include "Segment.h"
 #include "Parcours.h"
 #include "utils.h"
@@ -13,6 +13,7 @@
 
 #define SPI_CLK   13
 #define SPI_MOSI  11
+#define SHARP_CS  23
 
 #define NB_LIG    _nb_lignes_tot
 
@@ -90,35 +91,16 @@ class Segment;
 
 class TLCD : public TSharpMem, public IntelliScreen {
   public:
-    TLCD(uint8_t ss);
-    void cadran(uint8_t p_lig, uint8_t p_col, const char *champ, String  affi, const char *p_unite);
-    void cadranH(uint8_t p_lig, const char *champ, String  affi, const char *p_unite);
-    void updatePos(float lat_, float lon_, float alt_);
-    void updateAll();
-    void updateScreen(void);
-    void printBatt(void);
-    void afficheSegments(void);
-    void afficheParcours(void);
-    void afficheHRM(void);
-    void afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode);
-    void afficheListeParcours(uint8_t ligne);
-    void partner(float rtime, float curtime, uint8_t ind);
+    TLCD(uint8_t ss = SHARP_CS);
     void registerSegment(Segment *seg);
     void registerParcours(Parcours *par);
     void registerHisto(ListePoints *pts);
+
     void resetSegments(void);
     void resetParcours(void);
 
-    void afficheBoot();
-    void afficheGPS();
-    void afficheHT();
-    void affichageMenu ();
-    void decrANCS() {
-      if (_ancs_mode > 0)_ancs_mode -= 1;
-      return;
-    }
-    void affiANCS();
     void notifyANCS(uint8_t type_, const char *title_, const char *msg_);
+
     void setSD(int16_t status_) {
       boot.sd_ok = status_;
     }
@@ -139,6 +121,32 @@ class TLCD : public TSharpMem, public IntelliScreen {
       }
     }
 
+  protected:
+    void cadran(uint8_t p_lig, uint8_t p_col, const char *champ, String  affi, const char *p_unite);
+    void cadranH(uint8_t p_lig, const char *champ, String  affi, const char *p_unite);
+    void updatePos(float lat_, float lon_, float alt_);
+    void updatePos();
+    void printBatt(void);
+    void afficheSegments(void);
+    void afficheParcours(void);
+    void afficheHRM(void);
+    void afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode);
+    void afficheListeParcours(uint8_t ligne);
+    void partner(float rtime, float curtime, uint8_t ind);
+
+
+    void afficheBoot();
+    void afficheGPS();
+    void afficheHT();
+    void affichageMenu ();
+    void decrANCS() {
+      if (_ancs_mode > 0)_ancs_mode -= 1;
+      return;
+    }
+    void affiANCS();
+
+  protected:
+    uint8_t _ss, _seg_act, _par_act;
 
   private:
     void traceLignes(void);
@@ -153,7 +161,7 @@ class TLCD : public TSharpMem, public IntelliScreen {
     std::list<SNotif> l_notif;
 
     uint8_t _nb_lignes_tot;
-    uint8_t _ss, _seg_act, _par_act;
+
     float _lat, _lon, _alt;
     Segment *_l_seg[NB_SEG_REG];
     Parcours *_parc;

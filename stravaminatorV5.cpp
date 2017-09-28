@@ -53,7 +53,7 @@ void setup() {
 	display.begin();
 	delay(5);
 	display.resetBuffer();
-	display.updateScreen();
+	display.run(1);
 	display.registerHisto(&mes_points);
 
 #ifdef __DEBUG__
@@ -118,26 +118,26 @@ void setup() {
 		{
 		Serial.println(F("Card initialization failed."));
 		display.setSD(-1);
-		display.updateScreen();
+		display.run(1);
 		errorTone();
 		display.setModeCalcul(MODE_HRM);
 		display.setModeAffi(MODE_HRM);
-		display.updateScreen();
+		display.run(1);
 	}
 	else {
 		Serial.println(F("Card OK."));
 		display.setSD(1);
-		display.updateScreen();
+		display.run(1);
 		delay(150);
 		initListeSegments();
 		Serial.print("Nombre total de segments: ");
 		Serial.println(mes_segments.size());
 		display.setNbSeg(mes_segments.size());
-		display.updateScreen();
+		display.run(1);
 		delay(1000);
 		display.setModeCalcul(MODE_GPS);
 		display.setModeAffi(MODE_GPS);
-		display.updateScreen();
+		display.run(1);
 		delay(400);
 		Serial.println("Fin setup");
 	}
@@ -285,7 +285,6 @@ void loop() {
 	if (new_btn_data) {
 		new_btn_data = 0;
 		buttonEvent(nordic.getBTN());
-		display.updateScreen();
 	}
 	if (new_hrm_data) {
 		att.bpm = nordic.getBPM();
@@ -376,22 +375,6 @@ void loop() {
 	download_request = 0;
 	upload_request = 0;
 
-	// si pas de fix on affiche la page d'info GPS
-	if (att.nbpts > MIN_POINTS + 10 && display.getModeCalcul() != MODE_HRM && display.getModeCalcul() != MODE_HT) {
-		// loc is not good anymore
-		if (isLocOutdated() && display.getModeCalcul() == MODE_CRS) {
-			gps.sendCommand("$PMTK314,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0*29");
-			display.setStoredMode(display.getModeCalcul());
-			display.setModeCalcul(MODE_GPS);
-			display.setModeAffi(MODE_GPS);
-		} else if (!isLocOutdated() && display.getModeCalcul() == MODE_GPS) {
-			// loc is good again
-			gps.sendCommand("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28");
-			display.setModeCalcul(MODE_CRS);
-			display.setModeAffi(MODE_CRS);
-		}
-	}
-
 	// aiguillage pour chaque type d'affichage
 	switch (display.getModeCalcul()) {
 	case MODE_GPS:
@@ -415,7 +398,6 @@ void loop() {
 
 		if (updateLocData()) {
 			// no useable LOC
-			display.updateAll();
 			goto piege;
 		}
 
@@ -431,8 +413,6 @@ void loop() {
 		// maj merites
 		if (att.nbpts < MIN_POINTS) {
 
-			// maj sharp
-			display.updateAll();
 			goto piege;
 
 		} else if (att.nbpts == MIN_POINTS) {
@@ -482,7 +462,6 @@ void loop() {
 	case MODE_GPS:
 	case MODE_CRS:
 	case MODE_PAR:
-		display.updateAll();
 		break;
 
 	case MODE_HT:
@@ -510,7 +489,7 @@ void loop() {
 			att.secj_prec = att.secj;
 
 		}
-		display.updateAll();
+
 		break;
 
 	case MODE_SIMU:
@@ -534,16 +513,13 @@ void loop() {
 
 		}
 
-		display.updateAll();
 		break;
 	default:
-		display.updateAll();
 		break;
 
 	}
 
 	piege:
-	display.updateScreen();
 
 #ifdef __DEBUG__
 	digitalWriteFast(led, HIGH);

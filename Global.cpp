@@ -34,7 +34,7 @@ SnoozeBlock config_teensy35(usb, timer, digital);
 SdFile file;
 SdFile gpx;
 
-TLCD display(sharp_cs);
+DisplayManager display;
 
 myGPS         gps(&Serial1);
 TinyGPSCustom hdop(gps, "GPGSA", 16); // $GPGSA sentence, 16th element

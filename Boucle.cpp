@@ -14,10 +14,6 @@ void service_peripherals (uint8_t force) {
 	static uint32_t millis_;
 	static uint8_t nb_passages = 0;
 
-	if (display.getPendingAction() != NO_ACTION) {
-		display.updateScreen();
-	}
-
 	if (millis() - millis_ > PERIPHERALS_SERVICE_TIMEOUT || force) {
 
 		nb_passages++;
@@ -26,12 +22,8 @@ void service_peripherals (uint8_t force) {
 		// save time
 		millis_ = millis();
 
-		// backlight
-		if (display.getBackLight() != 0) {
-			digitalWriteFast(led, LOW);
-		} else {
-			digitalWriteFast(led, HIGH);
-		}
+		// run display and force @ 1Hz
+		display.run(nb_passages == 0);
 
 		// Power measurements
 		stc.refresh();

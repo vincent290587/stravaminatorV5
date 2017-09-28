@@ -6,10 +6,8 @@
 
 using namespace mvc;
 
-/* ************* */
-/* CONSTRUCTORS  */
-/* ************* */
-TLCD::TLCD(uint8_t ss) : TSharpMem(SPI_CLK, SPI_MOSI, ss), IntelliScreen() {
+
+TLCD::TLCD(uint8_t ss) : TSharpMem(SPI_CLK, SPI_MOSI, SHARP_CS), IntelliScreen() {
 
 	_seg_act = 0;
 	_nb_lignes_tot = 7;
@@ -19,11 +17,6 @@ TLCD::TLCD(uint8_t ss) : TSharpMem(SPI_CLK, SPI_MOSI, ss), IntelliScreen() {
 	_parc = NULL;
 	_points = NULL;
 
-	addMenuItem(" Mode CRS");
-	addMenuItem(" Mode PRC");
-	addMenuItem(" Mode HRM");
-	addMenuItem(" Mode HT");
-	addMenuItem(" Mode simu");
 }
 
 void TLCD::registerSegment(Segment *seg) {
@@ -126,56 +119,10 @@ void TLCD::cadran(uint8_t p_lig, uint8_t p_col, const char *champ, String  affi,
 }
 
 
-void TLCD::updateAll() {
+void TLCD::updatePos() {
 	updatePos(att.lat, att.lon, att.alt);
 }
 
-void TLCD::updateScreen(void) {
-
-	resetBuffer();
-
-	machineEtat();
-
-	switch (getModeAffi()) {
-	case MODE_SD:
-		afficheBoot();
-		break;
-	case MODE_GPS:
-		afficheGPS();
-		break;
-	case MODE_CRS:
-		setModeCalcul(MODE_CRS);
-		afficheSegments();
-		break;
-	case MODE_PAR:
-		setModeCalcul(MODE_CRS);
-		if (_par_act == 0) {
-			setModeAffi(MODE_CRS);
-			afficheSegments();
-		} else {
-			afficheParcours();
-		}
-		break;
-	case MODE_HRM:
-		setModeCalcul(MODE_HRM);
-		afficheHRM();
-		break;
-	case MODE_HT:
-		setModeCalcul(MODE_HT);
-		afficheHT();
-		break;
-	case MODE_SIMU:
-		setModeCalcul(MODE_SIMU);
-		afficheHT();
-		break;
-	case MODE_MENU:
-		affichageMenu ();
-		break;
-	}
-
-	affiANCS();
-	writeWhole();
-}
 
 void TLCD::afficheBoot() {
 
@@ -907,8 +854,6 @@ void TLCD::notifyANCS(uint8_t type_, const char *title_, const char *msg_) {
 }
 
 
-
-
 void TLCD::affichageMenu () {
 
 	setCursor(0, 50);
@@ -925,5 +870,3 @@ void TLCD::affichageMenu () {
 
 	setTextColor(CLR_NRM);
 }
-
-

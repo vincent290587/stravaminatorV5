@@ -10,10 +10,8 @@
 #include "myGPS.h"
 #include <STC3100.h>
 #include <Nordic.h>
-#include <IntelliScreen.h>
 #include <SerialFlash.h>
-#include "TSharpMem.h"
-#include "TLCD.h"
+#include "DisplayManager.h"
 #include "Merites.h"
 #include "ListePoints.h"
 #include "Segment.h"
@@ -47,7 +45,7 @@ extern SnoozeBlock config_teensy35;
 extern SdFile file;
 extern SdFile gpx;
 
-extern TLCD display;
+extern DisplayManager display;
 
 extern myGPS gps;
 extern TinyGPSCustom hdop; // $GPGSA sentence, 16th element
