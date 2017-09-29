@@ -863,8 +863,14 @@ void TLCD::affichageMenu () {
 	uint8_t i;
 
 	for (i = 0; i < getNbElemMenu(); i++) {
+		// left hor. space
+		println(String("  "));
+
 		if (i == getSelectionMenu()) setTextColor(CLR_INV);
+
+		// print item
 		println(getMenuItem(i));
+
 		if (i == getSelectionMenu()) setTextColor(CLR_NRM);
 	}
 
