@@ -15,23 +15,6 @@ using namespace mvc;
 
 DisplayManager* DisplayManager::pDisplayManager = nullptr;
 
-static void callbackMENU(int entier) {
-	// empty callback
-	uint8_t mode_cur = DisplayManager::pDisplayManager->getModeAffi();
-
-	if (mode_cur == MODE_MENU) {
-		// go back to last mode
-		uint8_t mode_prec = DisplayManager::pDisplayManager->getModeAffiPrec();
-		DisplayManager::pDisplayManager->setModeAffi(mode_prec == MODE_MENU ? MODE_CRS : mode_prec);
-	} else {
-		// save current mode
-		DisplayManager::pDisplayManager->setModeAffiPrec(mode_cur);
-		// reset selection
-		DisplayManager::pDisplayManager->resetSelectionMenu();
-		// dispay menu
-		DisplayManager::pDisplayManager->setModeAffi(MODE_MENU);
-	}
-}
 
 static void callbackCRS(int entier) {
 	// empty callback
@@ -62,15 +45,13 @@ DisplayManager::DisplayManager(): TLCD(SHARP_CS) {
 
 	pDisplayManager = this;
 
+	_needs_refresh = 0;
+
 	this->setModeAffi(MODE_SD);
 	this->setModeCalcul(MODE_GPS);
 
 	// init all the menu items
 	sIntelliMenuItem item;
-
-	item.name = "Retour";
-	item.p_func = callbackMENU;
-	this->addMenuItem(&item);
 
 	item.name = "Mode CRS";
 	item.p_func = callbackCRS;
@@ -236,6 +217,8 @@ void DisplayManager::runAffi(bool force) {
 
 		_needs_refresh = 0;
 
+		Serial.println(String("Mode affi: ") + this->getModeAffi());
+
 		this->resetBuffer();
 
 		// si pas de fix on affiche la page d'info GPS
@@ -340,3 +323,24 @@ void DisplayManager::buttonPressEvent () {
 bool DisplayManager::isMenuSelected() {
 	return this->getModeAffi() == MODE_MENU;
 }
+
+
+void DisplayManager::machineEtat () {
+
+	if (_pendingAction != NO_ACTION) {
+		if (_pendingAction == BUTTON_DOWN) {
+			this->menuDescend ();
+		} else if (_pendingAction == BUTTON_UP) {
+			this->menuMonte ();
+		} else if (_pendingAction == BUTTON_PRESS) {
+			this->menuClic ();
+		} else {
+			_pendingAction = NO_ACTION;
+			return;
+		}
+		_needs_refresh = 1;
+		_pendingAction = NO_ACTION;
+	}
+
+}
+

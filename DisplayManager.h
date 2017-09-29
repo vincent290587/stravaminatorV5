@@ -13,8 +13,11 @@
 #include "TLCD.h"
 
 
+/**
+ * MODE_MENU always has to equal I_MODE_MENU
+ */
 enum MODE_ECRAN {
-  MODE_MENU    = 0,
+  MODE_MENU    = I_MODE_MENU,
   MODE_SD      = 1,
   MODE_GPS     = 2,
   MODE_CRS     = 3,
@@ -24,6 +27,9 @@ enum MODE_ECRAN {
   MODE_SIMU    = 7,
 };
 
+/**
+ *
+ */
 class DisplayManager: public TLCD {
 public:
 	DisplayManager();
@@ -34,10 +40,13 @@ public:
 	void buttonEvent (uint8_t evt);
 
 	bool isMenuSelected();
+	void machineEtat ();
+
+	uint8_t getPendingAction() {return _pendingAction;}
 
 	static DisplayManager* pDisplayManager;
 protected:
-
+	uint8_t _needs_refresh;
 
 
 private:
@@ -45,6 +54,7 @@ private:
 	void buttonUpEvent ();
 	void buttonPressEvent ();
 
+	uint8_t _pendingAction;
 };
 
 
