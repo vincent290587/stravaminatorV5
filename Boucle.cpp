@@ -100,6 +100,9 @@ void init_peripherals () {
 		Serial.println("Fin setup");
 	}
 
+	// needs segments and parcours to run...
+	display.initSubMenus();
+
 }
 
 

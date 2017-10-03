@@ -14,8 +14,8 @@ TLCD::TLCD(uint8_t ss) : TSharpMem(SPI_CLK, SPI_MOSI, SHARP_CS), IntelliScreen()
 
 	boot.nb_seg = -1;
 
-	_parc = NULL;
-	_points = NULL;
+	_parc = nullptr;
+	_points = nullptr;
 
 }
 
@@ -29,8 +29,18 @@ void TLCD::registerSegment(Segment *seg) {
 
 void TLCD::registerParcours(Parcours *par) {
 
-	_parc = par;
-	_par_act = 1;
+	if (par != nullptr) {
+		_parc = par;
+		_par_act = 1;
+	}
+
+}
+
+void TLCD::emptyParcours() {
+
+	if (_parc) {
+		_parc->desallouerPoints();
+	}
 
 }
 
@@ -670,6 +680,8 @@ void TLCD::afficheListeParcours(uint8_t ligne) {
 	ListePoints *liste;
 	uint8_t nb_histo = 0;
 
+	if (!_parc) return;
+
 	if (_parc->longueur() < 5) return;
 
 
@@ -856,23 +868,23 @@ void TLCD::notifyANCS(uint8_t type_, const char *title_, const char *msg_) {
 
 void TLCD::affichageMenu () {
 
-	setCursor(0, 50);
-	setTextSize(3);
-	setTextColor(CLR_NRM);
+	this->setCursor(0, 50);
+	this->setTextSize(2);
+	this->setTextColor(CLR_NRM);
 
 	uint8_t i;
 
-	for (i = 0; i < getNbElemMenu(); i++) {
+	for (i = 0; i < this->getNbElemMenu(); i++) {
 		// left hor. space
-		println(String("  "));
+		this->print(String(" "));
 
-		if (i == getSelectionMenu()) setTextColor(CLR_INV);
+		if (i == this->getSelectionMenu()) this->setTextColor(CLR_INV);
 
 		// print item
-		println(getMenuItem(i));
+		this->println(this->getMenuItem(this->getActiveSubMenu(), i));
 
-		if (i == getSelectionMenu()) setTextColor(CLR_NRM);
+		if (i == this->getSelectionMenu()) this->setTextColor(CLR_NRM);
 	}
 
-	setTextColor(CLR_NRM);
+	this->setTextColor(CLR_NRM);
 }

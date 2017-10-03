@@ -96,6 +96,8 @@ class TLCD : public TSharpMem, public IntelliScreen {
     void registerParcours(Parcours *par);
     void registerHisto(ListePoints *pts);
 
+    void emptyParcours();
+
     void resetSegments(void);
     void resetParcours(void);
 

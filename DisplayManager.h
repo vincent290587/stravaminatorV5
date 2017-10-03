@@ -27,6 +27,11 @@ enum MODE_ECRAN {
   MODE_SIMU    = 7,
 };
 
+enum SUBMENUS {
+  MENU0        = 0,
+  SUBMENU_PRC  = 1,
+};
+
 /**
  *
  */
@@ -36,6 +41,8 @@ public:
 
 	void runCalcul();
 	void runAffi(bool force = 0);
+
+	void initSubMenus();
 
 	void buttonEvent (uint8_t evt);
 

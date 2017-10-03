@@ -79,11 +79,5 @@ doc:
 flash: $(OUTPUT_DIRECTORY)/stravaminatorV5.hex
 	@echo Flashing: $<
 
-
-# Flash softdevice
-flash_softdevice:
-	@echo Flashing: s332_nrf52_4.0.2_softdevice.hex
-
-
 erase:
 	@echo --eraseall

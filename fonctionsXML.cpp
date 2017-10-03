@@ -9,7 +9,6 @@ using namespace mvc;
 void initListeSegments() {
 
 	static char chaine[20];
-	Parcours *par_ = NULL;
 
 	Serial.flush();
 	Serial.println(F("Fichiers ajoutes:"));
@@ -31,14 +30,6 @@ void initListeSegments() {
 				// pas de chargement en double
 				Serial.println(F(": parcours trouve"));
 				mes_parcours.push_back(Parcours(chaine));
-				par_ = mes_parcours.getLastParcours();
-				if (chargerPAR(par_) == 0) {
-					display.registerParcours(par_);
-					Serial.println(F("Parcours enregistre"));
-				} else {
-					Serial.println(F("Chargement parcours incorrect"));
-				}
-
 			} else {
 				Serial.println(F(": probleme de nom de fichier"));
 			}
@@ -157,6 +148,7 @@ int chargerPAR(Parcours *mon_parcours) {
 #endif
 	} else {
 		Serial.println(F("Parcours vide"));
+		return 1;
 	}
 
 	return 0;
@@ -219,8 +211,8 @@ int chargerPointSeg(char *buffer, Segment *mon_segment, float *time_start) {
 int chargerPointPar(char *buffer, Parcours *mon_parcours) {
 
 	static int isError = 0;
-	static float lon, lat;
-	static float data[4];
+	float lon, lat, ele;
+	float data[4];
 	const char *deli = ";";
 	uint8_t pos = 0;
 	char *pch;
@@ -234,20 +226,22 @@ int chargerPointPar(char *buffer, Parcours *mon_parcours) {
 
 	// on se met au bon endroit
 	pch = strtok (buffer, deli);
-	while (pch != NULL && pos < 2)
+	while (pch != NULL && pos < 3)
 	{
-		data[pos] = strtof(pch, 0);
+		data[pos++] = strtof(pch, 0);
 		pch = strtok (NULL, deli);
-		pos++;
 	}
-	isError = pos != 2;
+	isError = (pos < 2);
 
 	if (!isError && mon_parcours) {
 
 		lat = data[0];
 		lon = data[1];
 
-		mon_parcours->ajouterPointFin(lat, lon);
+		if (pos > 2) ele = data[2];
+		else         ele = 0.;
+
+		mon_parcours->ajouterPointFin(lat, lon, ele);
 
 		return 0;
 

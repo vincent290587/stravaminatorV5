@@ -9,36 +9,68 @@
 #include "Boucle.h"
 #include "BoucleCRS.h"
 #include "Global.h"
+#include "FonctionsXML.h"
 
 using namespace mvc;
 
 
 DisplayManager* DisplayManager::pDisplayManager = nullptr;
 
+static void callbackPRC(int entier) {
+	// empty callback
+	DisplayManager::pDisplayManager->activateSubMenu(SUBMENU_PRC);
+}
+
+static void callbackSubPRC(int entier) {
+	// empty callback
+	int ind_prc = entier - 1;
+	Parcours *par = mes_parcours.getParcoursAt(ind_prc);
+	// empty old PRC
+	DisplayManager::pDisplayManager->emptyParcours();
+	// load the new PRC
+	if (chargerPAR(par) == 0) {
+		// no problem
+		DisplayManager::pDisplayManager->registerParcours(par);
+		DisplayManager::pDisplayManager->setModeAffi(MODE_PAR);
+	}
+	DisplayManager::pDisplayManager->deactivateMenu();
+}
+
+static void callbackSubAbort(int entier) {
+	// abort go back to menu
+	DisplayManager::pDisplayManager->activateSubMenu(I_MODE_MENU);
+}
 
 static void callbackCRS(int entier) {
 	// empty callback
 	DisplayManager::pDisplayManager->setModeAffi(MODE_CRS);
-}
-
-static void callbackPRC(int entier) {
-	// empty callback
-	DisplayManager::pDisplayManager->setModeAffi(MODE_PAR);
+	DisplayManager::pDisplayManager->deactivateMenu();
+	// empty old PRC
+	DisplayManager::pDisplayManager->emptyParcours();
 }
 
 static void callbackHRM(int entier) {
 	// empty callback
 	DisplayManager::pDisplayManager->setModeAffi(MODE_HRM);
+	DisplayManager::pDisplayManager->deactivateMenu();
+	// empty old PRC
+	DisplayManager::pDisplayManager->emptyParcours();
 }
 
 static void callbackHT(int entier) {
 	// empty callback
 	DisplayManager::pDisplayManager->setModeAffi(MODE_HT);
+	DisplayManager::pDisplayManager->deactivateMenu();
+	// empty old PRC
+	DisplayManager::pDisplayManager->emptyParcours();
 }
 
 static void callbackSimu(int entier) {
 	// empty callback
 	DisplayManager::pDisplayManager->setModeAffi(MODE_SIMU);
+	DisplayManager::pDisplayManager->deactivateMenu();
+	// empty old PRC
+	DisplayManager::pDisplayManager->emptyParcours();
 }
 
 DisplayManager::DisplayManager(): TLCD(SHARP_CS) {
@@ -55,26 +87,49 @@ DisplayManager::DisplayManager(): TLCD(SHARP_CS) {
 
 	item.name = "Mode CRS";
 	item.p_func = callbackCRS;
-	this->addMenuItem(&item);
+	this->addMenuItem(MENU0, &item);
 
 	item.name = "Mode PRC";
 	item.p_func = callbackPRC;
-	this->addMenuItem(&item);
+	this->addMenuItem(MENU0, &item);
 
 	item.name = "Mode HRM";
 	item.p_func = callbackHRM;
-	this->addMenuItem(&item);
+	this->addMenuItem(MENU0, &item);
 
 	item.name = "Mode HT";
 	item.p_func = callbackHT;
-	this->addMenuItem(&item);
+	this->addMenuItem(MENU0, &item);
 
 	item.name = "Mode simu";
 	item.p_func = callbackSimu;
-	this->addMenuItem(&item);
+	this->addMenuItem(MENU0, &item);
 
 }
 
+
+void DisplayManager::initSubMenus() {
+
+	//// submenus
+	sIntelliMenuItem item;
+
+	// add parcours
+	std::list<Parcours>::iterator _iter;
+	if (mes_parcours.size()) {
+		for (_iter = mes_parcours._parcs.begin(); mes_parcours.size() != 0 && _iter != mes_parcours._parcs.end(); _iter++) {
+
+			item.name = (*_iter).getName();
+			item.p_func = callbackSubPRC;
+			this->addMenuItem(SUBMENU_PRC, &item);
+
+		}
+	} else {
+		item.name = "No PRC ...";
+		item.p_func = callbackSubAbort;
+		this->addMenuItem(SUBMENU_PRC, &item);
+	}
+
+}
 
 void DisplayManager::runCalcul() {
 

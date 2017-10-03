@@ -31,7 +31,7 @@ class Parcours {
     }
     int isValid();
     const char* getName();
-    void ajouterPointFin(float lat, float lon);
+    void ajouterPointFin(float lat, float lon, float alt=0);
     void ajouterPointDebutIso(float lat, float lon);
     void toString();
     Vecteur posAuParcours(Point point);
@@ -59,6 +59,7 @@ class ListeParcours {
     void push_back(Parcours prc) {
       _parcs.push_back(prc);
     };
+    Parcours *getParcoursAt(int i);
     Parcours *getLastParcours(void) {
       return &_parcs.back();
     }
