@@ -148,12 +148,15 @@ void setup() {
 	// snooze timer in milliseconds
 	timer.setTimer(25);
 
+
 	/********************************************************
 	     Define digital pins for waking the teensy up. This
 	     combines pinMode and attachInterrupt in one function.
 	 ********************************************************/
-//	digital.pinMode(0, INPUT_PULLUP, FALLING);//pin, mode, type
-//	digital.pinMode(7, INPUT_PULLUP, FALLING);//pin, mode, type
+	digital.pinMode(0, INPUT_PULLUP, CHANGE);//pin, mode, type
+	digital.pinMode(7, INPUT_PULLUP, CHANGE);//pin, mode, type
+	config_teensy35 += digital;
+	config_teensy35 += timer;
 
 	is_gps_awake = 1;
 
@@ -229,6 +232,8 @@ void loop() {
 		do {
 			// TODO sleep
 			Snooze.idle(config_teensy35);
+//			Serial.printf("Timer Driver number indicator: %i\n", who); // print who woke up, i.e. timer
+
 //			idle();
 		} while (loop_save_power);
 

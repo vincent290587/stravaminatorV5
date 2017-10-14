@@ -24,6 +24,7 @@ namespace mvc {
 MTPStorage_SD storage;
 MTPD          mtpd(&storage);
 
+SnoozeDigital digital;
 //SnoozeDigital digital;
 SnoozeTimer timer;
 SnoozeUSBSerial usb;

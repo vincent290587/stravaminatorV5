@@ -37,6 +37,7 @@ extern MTPStorage_SD storage;
 extern MTPD          mtpd;
 
 //extern SnoozeDigital digital;
+extern SnoozeDigital digital;
 extern SnoozeTimer timer;
 extern SnoozeUSBSerial usb;
 
