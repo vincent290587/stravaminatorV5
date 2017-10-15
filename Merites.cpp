@@ -123,7 +123,9 @@ void Merite::majPower(ListePoints *mes_points, float speed_) {
 			Pc = mes_points->getPointAt(i);
 			_x[i] = Pc._rtime - P2._rtime;
 			_y[i] = Pc._alt;
+#ifdef __DEBUG__
 			Serial.println("Alt " + String(_x[i], 2) + " / " + String(_y[i], 1));
+#endif
 		}
 
 		_lrCoef[1] = _lrCoef[0] = 0;

@@ -20,6 +20,7 @@
 #include "PCComm.h"
 #include "Logger.h"
 #include "MTP.h"
+#include "Zoom.h"
 
 
 #include "define.h"
@@ -48,6 +49,7 @@ extern SdFile file;
 extern SdFile gpx;
 
 extern DisplayManager display;
+extern Zoom zoom;
 
 extern myGPS gps;
 extern TinyGPSCustom hdop; // $GPGSA sentence, 16th element

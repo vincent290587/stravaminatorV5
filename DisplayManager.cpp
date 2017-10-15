@@ -30,8 +30,17 @@ static void callbackSubPRC(int entier) {
 	// load the new PRC
 	if (chargerPAR(par) == 0) {
 		// no problem
-		DisplayManager::pDisplayManager->registerParcours(par);
-		DisplayManager::pDisplayManager->setModeAffi(MODE_PAR);
+		if (par->longueur() > 5) {
+			DisplayManager::pDisplayManager->registerParcours(par);
+			DisplayManager::pDisplayManager->setModeAffi(MODE_PAR);
+		} else {
+			DisplayManager::pDisplayManager->notifyANCS(ANCS_NOTIF_WITH_TITLE, "PRC", "PRC too short");
+		}
+
+		// reset zoom settings
+		zoom.resetZoom();
+	} else {
+		DisplayManager::pDisplayManager->notifyANCS(ANCS_NOTIF_WITH_TITLE, "PRC", "PRC issue at load");
 	}
 	DisplayManager::pDisplayManager->deactivateMenu();
 }
@@ -141,7 +150,8 @@ void DisplayManager::runCalcul() {
 		display.setHDOP(String(hdop.value()).toInt());
 
 		// no break;
-
+	case MODE_PAR:
+		// no break;
 	case MODE_CRS:
 
 		if (mode_simu) {
@@ -281,14 +291,15 @@ void DisplayManager::runAffi(bool force) {
 			// loc is not good anymore
 			if (isLocOutdated() && this->getModeCalcul() == MODE_CRS) {
 				gps.sendCommand("$PMTK314,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0*29");
-				display.setStoredMode(this->getModeCalcul());
+				display.setStoredMode1(this->getModeCalcul());
+				display.setStoredMode2(this->getModeAffi());
 				display.setModeCalcul(MODE_GPS);
 				display.setModeAffi(MODE_GPS);
 			} else if (!isLocOutdated() && this->getModeCalcul() == MODE_GPS) {
 				// loc is good again
 				gps.sendCommand("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28");
-				this->setModeCalcul(MODE_CRS);
-				this->setModeAffi(MODE_CRS);
+				this->setModeCalcul(display.getStoredMode1());
+				this->setModeAffi(display.getStoredMode2());
 			}
 		}
 
@@ -306,6 +317,7 @@ void DisplayManager::runAffi(bool force) {
 		case MODE_PAR:
 			this->setModeCalcul(MODE_CRS);
 			if (_par_act == 0) {
+				this->notifyANCS(ANCS_NOTIF_WITH_TITLE, "PRC", "No PRC activated");
 				this->setModeAffi(MODE_CRS);
 				this->afficheSegments();
 			} else {
@@ -385,10 +397,30 @@ void DisplayManager::machineEtat () {
 	if (_pendingAction != NO_ACTION) {
 		if (_pendingAction == BUTTON_DOWN) {
 			this->menuDescend ();
+
+			// update zoom if in PRC mode
+			if (!this->isMenuSelected() &&
+					display.getModeAffi() == MODE_PAR) {
+
+				zoom.increaseZoom();
+
+			}
+
 		} else if (_pendingAction == BUTTON_UP) {
 			this->menuMonte ();
+
+			// update zoom if in PRC mode
+			if (!this->isMenuSelected() &&
+					display.getModeAffi() == MODE_PAR) {
+
+				zoom.decreaseZoom();
+
+			}
+
 		} else if (_pendingAction == BUTTON_PRESS) {
+
 			this->menuClic ();
+
 		} else {
 			_pendingAction = NO_ACTION;
 			return;

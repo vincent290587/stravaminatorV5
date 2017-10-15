@@ -9,6 +9,11 @@
 #include "utils.h"
 #include "WProgram.h"
 
+#define VH_RATIO        0.8
+
+#define ANCS_NOTIF_WITH_TITLE    1
+#define ANCS_NOTIF_NO_TITLE      0
+
 #define SEG_OFF_NB_POINTS   5
 
 #define SPI_CLK   13
@@ -126,8 +131,6 @@ class TLCD : public TSharpMem, public IntelliScreen {
   protected:
     void cadran(uint8_t p_lig, uint8_t p_col, const char *champ, String  affi, const char *p_unite);
     void cadranH(uint8_t p_lig, const char *champ, String  affi, const char *p_unite);
-    void updatePos(float lat_, float lon_, float alt_);
-    void updatePos();
     void printBatt(void);
     void afficheSegments(void);
     void afficheParcours(void);
@@ -157,7 +160,6 @@ class TLCD : public TSharpMem, public IntelliScreen {
 
     uint8_t _nb_lignes_tot;
 
-    float _lat, _lon, _alt;
     Segment *_l_seg[NB_SEG_REG];
     Parcours *_parc;
     ListePoints *_points;

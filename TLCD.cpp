@@ -29,7 +29,7 @@ void TLCD::registerSegment(Segment *seg) {
 
 void TLCD::registerParcours(Parcours *par) {
 
-	if (par != nullptr) {
+	if (par->longueur() > 5) {
 		_parc = par;
 		_par_act = 1;
 	}
@@ -56,12 +56,6 @@ void TLCD::resetSegments() {
 
 void TLCD::resetParcours() {
 	_par_act = 0;
-}
-
-void TLCD::updatePos(float lat_, float lon_, float alt_) {
-	_lat = lat_;
-	_lon = lon_;
-	_alt = alt_;
 }
 
 void TLCD::cadranH(uint8_t p_lig, const char *champ, String  affi, const char *p_unite) {
@@ -126,11 +120,6 @@ void TLCD::cadran(uint8_t p_lig, uint8_t p_col, const char *champ, String  affi,
 
 	if (p_lig > 1) drawFastHLine(LCDWIDTH * (p_col - 1) / 2, LCDHEIGHT / NB_LIG * (p_lig - 1), LCDWIDTH / 2, BLACK);
 	if (p_lig < NB_LIG) drawFastHLine(LCDWIDTH * (p_col - 1) / 2, LCDHEIGHT / NB_LIG * p_lig, LCDWIDTH / 2, BLACK);
-}
-
-
-void TLCD::updatePos() {
-	updatePos(att.lat, att.lon, att.alt);
 }
 
 
@@ -357,7 +346,7 @@ void TLCD::afficheParcours(void) {
 
 	String mins = "00";
 
-	if (att.nbpts - MIN_POINTS > 0 && att.nbsec_act > MIN_POINTS) {
+	if (att.nbpts > MIN_POINTS && att.nbsec_act > MIN_POINTS) {
 		unsigned long int mns = 0;
 
 		vmoy = att.dist / att.nbsec_act * 3.6;
@@ -458,9 +447,7 @@ void TLCD::partner(float rtime, float curtime, uint8_t ligne) {
 }
 
 
-/**
- *
- */
+
 void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
 
 	int posTrouve = 0;
@@ -525,8 +512,9 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
 		if (pSuivant->_lon > maxLon) maxLon = pSuivant->_lon;
 		if (pSuivant->_alt > maxAlt) maxAlt = pSuivant->_alt;
 
-		if (maDist > distance_between(pCourant->_lat, pCourant->_lon, _lat, _lon) && _l_seg[ind_seg]->getStatus() > SEG_OFF) {
-			maDist = distance_between(pCourant->_lat, pCourant->_lon, _lat, _lon) + 0.1;
+		if (maDist > distance_between(pCourant->_lat, pCourant->_lon, att.lat, att.lon) &&
+				_l_seg[ind_seg]->getStatus() > SEG_OFF) {
+			maDist = distance_between(pCourant->_lat, pCourant->_lon, att.lat, att.lon) + 0.1;
 			maPos = pCourant;
 		}
 
@@ -540,37 +528,48 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
 	} else if (_l_seg[ind_seg]->getStatus() == SEG_OFF) {
 		// first point
 		maPos = liste->getFirstPoint();
-		maDist = distance_between(maPos->_lat, maPos->_lon, _lat, _lon) + 0.1;
+		maDist = distance_between(maPos->_lat, maPos->_lon, att.lat, att.lon) + 0.1;
 
 		// notre position doit etre dans le rectangle
-		if (_lat < minLat) minLat = _lat;
-		if (_lon < minLon) minLon = _lon;
-		if (_alt < minAlt) minAlt = _alt;
+		if (att.lat < minLat) minLat = att.lat;
+		if (att.lon < minLon) minLon = att.lon;
+		if (att.alt < minAlt) minAlt = att.alt;
 
-		if (_lat > maxLat) maxLat = _lat;
-		if (_lon > maxLon) maxLon = _lon;
-		if (_alt > maxAlt) maxAlt = _alt;
+		if (att.lat > maxLat) maxLat = att.lat;
+		if (att.lon > maxLon) maxLon = att.lon;
+		if (att.alt > maxAlt) maxAlt = att.alt;
 	}
 
 	// on essaye de rendre l'image carree: ratio 1:1
-	//if (_l_seg[ind_seg]->getStatus() != SEG_OFF) {
-	while (maxLon - minLon < (maxLat - minLat)) {
-		minLon -= 0.0008;
-		maxLon += 0.0008;
-	}
+	// compute convertion between deg and meters
+	float deglon_to_m = 1000. * distance_between(att.lat, 0., att.lat, 0.001);
+	float deglat_to_m = 1000. * distance_between(att.lat, 0., att.lat + 0.001, 0.);
 
-	while (maxLat - minLat < 0.5 * (maxLon - minLon)) {
-		minLat -= 0.0014;
-		maxLat += 0.0014;
+	float v_span = distance_between(minLat, minLon, maxLat, minLon);
+	float h_span = distance_between(minLat, minLon, minLat, maxLon);
+
+	//if (_l_seg[ind_seg]->getStatus() != SEG_OFF) {
+	if (h_span < VH_RATIO * v_span) {
+		while (h_span < VH_RATIO * v_span) {
+			minLon -= 50 / deglon_to_m;
+			maxLon += 50 / deglon_to_m;
+			h_span = distance_between(minLat, minLon, minLat, maxLon);
+		}
+	} else if (v_span < VH_RATIO * h_span) {
+		while (v_span < VH_RATIO * h_span) {
+			minLat -= 50 / deglat_to_m;
+			maxLat += 50 / deglat_to_m;
+			v_span = distance_between(minLat, minLon, maxLat, minLon);
+		}
 	}
 	//}
 
-	// marge TODO
-	minLat -= 0.0014;
-	minLon -= 0.0008;
+	// marge
+	minLat -= 150 / deglat_to_m;
+	minLon -= 150 / deglon_to_m;
 	minAlt -= 15.;
-	maxLat += 0.0014;
-	maxLon += 0.0008;
+	maxLat += 150 / deglat_to_m;
+	maxLon += 150 / deglon_to_m;
 	maxAlt += 15.;
 	maxDist += 50.;
 
@@ -625,10 +624,15 @@ void TLCD::afficheListePoints(uint8_t ligne, uint8_t ind_seg, uint8_t mode) {
 	}
 
 	// limit position when segment is finished
+	float _lat, _lon, _alt;
 	if (_l_seg[ind_seg]->getStatus() < SEG_OFF) {
 		_lon = pCourant->_lon;
 		_lat = pCourant->_lat;
 		_alt = pCourant->_alt;
+	} else {
+		_lon = att.lon;
+		_lat = att.lat;
+		_alt = att.alt;
 	}
 
 	// ma position
@@ -671,7 +675,6 @@ void TLCD::afficheListeParcours(uint8_t ligne) {
 	float minLon = 400.;
 	float maxLat = -100.;
 	float maxLon = -400.;
-	float dDist = 0.;
 	float maDist = 10000.;
 	Point *pCourant, *pSuivant;
 	float maDpex = 0;
@@ -693,30 +696,21 @@ void TLCD::afficheListeParcours(uint8_t ligne) {
 	if (ligne < NB_LIG) drawFastHLine(0, fin_cadran, LCDWIDTH, BLACK);
 
 	// init
+	zoom.setSpan(LCDWIDTH, fin_cadran - debut_cadran);
 	liste = _parc->getListePoints();
 
 	// on cherche la taille de fenetre
+	maDist = liste->dist(att.lat, att.lon);
 
-	// distance au parcours
-	maDist = liste->dist(_lat, _lon);
-	minLon = maxLon = _lon;
-	minLat = maxLat = _lat;
+	float dZoom_h;
+	float dZoom_v;
+	zoom.computeZoom(att.lat, maDist, dZoom_h, dZoom_v);
 
-	if (maDist > 300) {
-		dDist = maDist + 300;
-	} else {
-		dDist = 300;
-	}
+	maxLon = att.lon + dZoom_h;
+	minLon = att.lon - dZoom_h;
 
-	while (distance_between(minLat, minLon, maxLat, maxLon) < dDist) {
-
-		minLon -= 0.0008;
-		maxLon += 0.0008;
-		minLat -= 0.0014;
-		maxLat += 0.0014;
-
-	}
-
+	maxLat = att.lat + dZoom_v;
+	minLat = att.lat - dZoom_v;
 
 	// on affiche
 	for (_iter = liste->getLPTS()->begin(); _iter != liste->getLPTS()->end();) {
@@ -728,7 +722,7 @@ void TLCD::afficheListeParcours(uint8_t ligne) {
 
 		if (!pSuivant->isValid() || !pCourant->isValid()) break;
 
-
+		// on limite le parcours à l'ecran
 		if ((minLon < pCourant->_lon && pCourant->_lon < maxLon &&
 				minLat < pCourant->_lat && pCourant->_lat < maxLat) ||
 				(minLon < pSuivant->_lon && pSuivant->_lon < maxLon &&
@@ -775,8 +769,8 @@ void TLCD::afficheListeParcours(uint8_t ligne) {
 	}
 
 	// position courante
-	maDpex = regFenLim(_lon, minLon, maxLon, 0, LCDWIDTH);
-	maDpey = regFenLim(_lat, minLat, maxLat, fin_cadran, debut_cadran);
+	maDpex = regFenLim(att.lon, minLon, maxLon, 0, LCDWIDTH);
+	maDpey = regFenLim(att.lat, minLat, maxLat, fin_cadran, debut_cadran);
 	fillCircle(maDpex, maDpey, 6, BLACK);
 
 
@@ -784,7 +778,7 @@ void TLCD::afficheListeParcours(uint8_t ligne) {
 		if (_l_seg[0]->getListePoints()) {
 
 			// avance segment
-			setTextSize(3);
+			setTextSize(2);
 			setCursor(maDpex + 15, maDpey - 20);
 			print(String(_l_seg[0]->getAvance(), 1));
 
@@ -809,6 +803,10 @@ void TLCD::afficheListeParcours(uint8_t ligne) {
 			}
 		}
 	}
+
+	setTextSize(2);
+	setCursor(210, fin_cadran - 30);
+	print(zoom.getZoomLevel());
 
 	setTextColor(CLR_NRM); // 'inverted' text
 
